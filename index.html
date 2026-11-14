@@ -3,14 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Umndeni">
-  <title>Umndeni</title>
+  <meta name="theme-color" content="#0E4366">
+  <meta name="description" content="Order Umndeni Skin Care petroleum jelly in bulk.">
+  <title>Umndeni | Wholesale Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
 </head>
 <body>
-  <main id="app">
-    <!-- Umndeni website content will go here. -->
-  </main>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" data-page="home" aria-label="Umndeni home">
+        <span class="brand-mark">U</span>
+        <span class="brand-copy"><strong>umndeni</strong><small>SKIN CARE</small></span>
+      </a>
+
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <button class="nav-link active" data-page="home"><span class="nav-icon">⌂</span><span>Overview</span></button>
+        <button class="nav-link" data-page="shop"><span class="nav-icon">▦</span><span>Shop products</span></button>
+        <button class="nav-link" data-page="orders"><span class="nav-icon">▤</span><span>My orders</span><span class="nav-count" id="ordersNavCount">0</span></button>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-help">
+        <div class="help-icon">?</div>
+        <strong>Need a hand?</strong>
+        <p>We're here to help with your bulk orders.</p>
+        <button class="text-button" data-page="help">Get support <span>→</span></button>
+      </div>
+      <div class="sidebar-bottom">
+        <button class="nav-link" data-page="account"><span class="nav-icon">◎</span><span>My account</span></button>
+        <div class="sidebar-foot"><span class="online-dot"></span> Wholesale ordering portal</div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu icon-button" id="mobileMenu" aria-label="Open navigation">☰</button>
+          <div class="breadcrumb"><span>Umndeni</span><span class="crumb-slash">/</span><strong id="pageCrumb">Overview</strong></div>
+        </div>
+        <div class="topbar-actions">
+          <div class="topbar-welcome"><span class="online-dot"></span> Wholesale portal</div>
+          <button class="cart-top-button" id="openCart" aria-label="Open shopping cart"><span class="cart-symbol">▣</span><span class="cart-label">Cart</span><span class="cart-badge" id="cartBadge">0</span></button>
+          <button class="avatar-button" data-page="account" aria-label="My account">G</button>
+        </div>
+      </header>
+
+      <div class="page-wrap">
+        <section class="page-view active" id="page-home">
+          <div class="welcome-row">
+            <div><div class="eyebrow"><span class="eyebrow-line"></span> UMNDENI WHOLESALE</div><h1>Good day<span id="welcomeName"></span>.</h1><p class="muted">Everything you need to manage your Umndeni bulk orders.</p></div>
+            <button class="button button-primary" data-page="shop"><span>＋</span> Start an order</button>
+          </div>
+
+          <div class="hero-panel">
+            <div class="hero-content">
+              <span class="hero-kicker">CARE THAT GOES FURTHER</span>
+              <h2>Stock up on<br><em>everyday care.</em></h2>
+              <p>Order Umndeni Skin Care petroleum jelly in bulk, all in one simple place.</p>
+              <button class="button button-white" data-page="shop">Explore products <span>→</span></button>
+            </div>
+            <div class="hero-art" aria-label="Product photography placeholder">
+              <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
+              <div class="hero-product-placeholder"><span class="placeholder-cross">✳</span><strong>UMNDENI</strong><small>PRODUCT IMAGE</small><span class="placeholder-note">Official product photography<br>will appear here</span></div>
+              <span class="hero-art-caption">UMNDENI SKIN CARE</span>
+            </div>
+            <div class="hero-decoration"></div>
+          </div>
+
+          <div class="section-heading"><div><span class="section-kicker">YOUR BUSINESS</span><h2>Order at a glance</h2></div><button class="text-button" data-page="orders">View all orders <span>→</span></button></div>
+          <div class="stats-grid">
+            <article class="stat-card"><div class="stat-top"><span>Total orders</span><span class="stat-icon navy-icon">▤</span></div><strong id="statTotalOrders">0</strong><small>Orders placed from this account</small></article>
+            <article class="stat-card"><div class="stat-top"><span>Awaiting confirmation</span><span class="stat-icon amber-icon">◷</span></div><strong id="statPendingOrders">0</strong><small>Orders still being processed</small></article>
+            <article class="stat-card"><div class="stat-top"><span>Items in your cart</span><span class="stat-icon green-icon">▣</span></div><strong id="statCartItems">0</strong><small>Boxes ready for checkout</small></article>
+          </div>
+
+          <div class="home-bottom-grid">
+            <article class="content-card featured-card">
+              <div class="card-heading"><div><span class="section-kicker">FEATURED PRODUCT</span><h3>Umndeni Petroleum Jelly</h3></div><span class="pill pill-green">Bulk supply</span></div>
+              <div class="featured-product-row">
+                <div class="mini-product-art"><span>U</span><small>PRODUCT IMAGE</small></div>
+                <div class="featured-info"><p>Everyday skin care, available for bulk ordering.</p><div class="product-price">Price on request</div><button class="button button-primary button-small" data-page="shop">View product <span>→</span></button></div>
+              </div>
+            </article>
+            <article class="content-card recent-card">
+              <div class="card-heading"><div><span class="section-kicker">RECENT ACTIVITY</span><h3>Recent orders</h3></div><button class="icon-text-button" data-page="orders">See all →</button></div>
+              <div id="recentOrders"><div class="empty-inline"><span class="empty-icon">▤</span><p>No orders yet.</p><small>Your recent orders will appear here.</small></div></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page-view" id="page-shop">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> THE UMNDENI RANGE</div><h1>Shop products</h1><p class="muted">Choose your bulk quantity and add boxes to your order.</p></div><span class="catalog-tag">WHOLESALE CATALOGUE</span></div>
+          <div class="shop-layout">
+            <article class="product-detail-card">
+              <div class="product-visual">
+                <span class="visual-tag">UMNDENI SKIN CARE</span>
+                <div class="product-image-placeholder"><span class="placeholder-cross">✳</span><strong>PRODUCT<br>PHOTOGRAPHY</strong><small>Official product image placeholder</small></div>
+                <span class="visual-bottom">EVERYDAY SKIN CARE</span>
+              </div>
+              <div class="product-information">
+                <div class="product-meta"><span class="pill pill-green">Bulk product</span><span class="stock-indicator"><i></i> Available to order</span></div>
+                <h2>Umndeni Petroleum Jelly</h2>
+                <p class="product-description">Umndeni Skin Care petroleum jelly, available to retailers and bulk buyers. Select the number of boxes you'd like to order and submit your request.</p>
+                <div class="product-highlights"><div><span class="highlight-icon">✓</span><span>Bulk ordering</span></div><div><span class="highlight-icon">✓</span><span>Business-friendly ordering</span></div><div><span class="highlight-icon">✓</span><span>Delivery details at checkout</span></div></div>
+                <div class="product-purchase">
+                  <div><span class="field-label">PRICE</span><strong class="price-request">Price on request</strong><small>Pricing will be confirmed by Umndeni.</small></div>
+                  <div class="quantity-control"><button class="qty-btn" id="productQtyMinus" aria-label="Decrease quantity">−</button><span id="productQty">1</span><button class="qty-btn" id="productQtyPlus" aria-label="Increase quantity">＋</button></div>
+                </div>
+                <button class="button button-primary add-cart-button" id="addToCart">Add boxes to cart <span>→</span></button>
+                <div class="secure-note"><span>⌑</span> Your order request will be reviewed before payment.</div>
+              </div>
+            </article>
+            <aside class="shop-aside">
+              <article class="aside-card">
+                <div class="aside-icon">▣</div><h3>Ordering in bulk</h3><p>Add the number of boxes you need. You can update quantities in your cart before submitting your order.</p>
+                <div class="aside-divider"></div><div class="aside-feature"><span>01</span><div><strong>Choose your quantity</strong><small>Select how many boxes you need.</small></div></div><div class="aside-feature"><span>02</span><div><strong>Submit your details</strong><small>Tell us where to contact and deliver.</small></div></div><div class="aside-feature"><span>03</span><div><strong>We'll confirm your order</strong><small>Pricing and next steps will be confirmed.</small></div></div>
+              </article>
+              <article class="aside-note"><span class="note-icon">i</span><div><strong>Need a larger order?</strong><p>Contact our team if you'd like assistance with a bulk purchase.</p><button class="text-button" data-page="help">Contact support →</button></div></article>
+            </aside>
+          </div>
+        </section>
+
+        <section class="page-view" id="page-orders">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> YOUR ORDER ACTIVITY</div><h1>My orders</h1><p class="muted">Keep track of your Umndeni bulk order requests.</p></div><button class="button button-primary" data-page="shop">＋ New order</button></div>
+          <div class="orders-toolbar"><div class="orders-tabs"><button class="order-filter active" data-filter="all">All orders</button><button class="order-filter" data-filter="pending">Awaiting confirmation</button></div><span class="results-count" id="ordersCount">0 orders</span></div>
+          <div class="orders-card"><div class="orders-table-head"><span>ORDER</span><span>DATE</span><span>ITEMS</span><span>STATUS</span><span></span></div><div id="ordersList"><div class="empty-state"><div class="empty-state-icon">▤</div><h3>No orders just yet</h3><p>Once you submit an order, it will appear here.</p><button class="button button-primary" data-page="shop">Browse products</button></div></div></div>
+        </section>
+
+        <section class="page-view" id="page-checkout">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> ALMOST THERE</div><h1>Checkout</h1><p class="muted">Enter your details to submit your bulk order request.</p></div><span class="checkout-step"><span>1</span> Your details <i></i><span>2</span> Confirmation</span></div>
+          <div class="checkout-layout">
+            <form class="checkout-form content-card" id="checkoutForm">
+              <div class="form-section"><div class="form-section-heading"><span class="form-number">01</span><div><h3>Contact information</h3><p>Who should we contact about this order?</p></div></div>
+                <div class="form-grid"><label class="form-field"><span>Full name *</span><input name="fullName" type="text" placeholder="e.g. Thando Mkhize" required autocomplete="name"></label><label class="form-field"><span>Email address *</span><input name="email" type="email" placeholder="you@business.co.za" required autocomplete="email"></label><label class="form-field"><span>Phone number *</span><input name="phone" type="tel" placeholder="+27 00 000 0000" required autocomplete="tel"></label><label class="form-field"><span>Business name</span><input name="business" type="text" placeholder="Your business name" autocomplete="organization"></label></div>
+              </div>
+              <div class="form-divider"></div>
+              <div class="form-section"><div class="form-section-heading"><span class="form-number">02</span><div><h3>Delivery information</h3><p>Where should your order be delivered?</p></div></div>
+                <div class="form-grid"><label class="form-field full-field"><span>Street address *</span><input name="address" type="text" placeholder="Street and building name" required autocomplete="street-address"></label><label class="form-field"><span>City / Town *</span><input name="city" type="text" placeholder="City or town" required autocomplete="address-level2"></label><label class="form-field"><span>Province *</span><select name="province" required><option value="">Select province</option><option>Eastern Cape</option><option>Free State</option><option>Gauteng</option><option>KwaZulu-Natal</option><option>Limpopo</option><option>Mpumalanga</option><option>North West</option><option>Northern Cape</option><option>Western Cape</option></select></label><label class="form-field"><span>Postal code</span><input name="postalCode" type="text" placeholder="e.g. 4001" autocomplete="postal-code"></label></div>
+                <label class="form-field notes-field"><span>Order notes <small>OPTIONAL</small></span><textarea name="notes" rows="3" placeholder="Anything else we should know about your order?"></textarea></label>
+              </div>
+              <div class="form-divider"></div>
+              <div class="checkout-assurance"><span>✓</span><p>This is an order request, not a payment. The Umndeni team will confirm pricing, availability and delivery arrangements with you.</p></div>
+              <button class="button button-primary submit-order-button" type="submit">Submit order request <span>→</span></button>
+            </form>
+            <aside class="checkout-summary content-card"><span class="section-kicker">YOUR ORDER</span><h3>Order summary</h3><div id="checkoutItems"></div><div class="summary-line"><span>Boxes</span><strong id="checkoutBoxCount">0</strong></div><div class="summary-line total-line"><span>Order total</span><strong>Price on request</strong></div><div class="summary-info"><span>i</span><p>Final pricing and any delivery charges will be confirmed by our team before payment.</p></div><button class="back-to-cart" type="button" id="backToCart">← Edit cart</button></aside>
+          </div>
+        </section>
+
+        <section class="page-view" id="page-confirmation">
+          <div class="confirmation-wrap content-card"><div class="success-mark">✓</div><span class="section-kicker">ORDER REQUEST RECEIVED</span><h1>Thank you for<br>choosing Umndeni.</h1><p>Your order request has been submitted successfully. Our team will be in touch to confirm the details.</p><div class="confirmation-reference"><span>YOUR ORDER NUMBER</span><strong id="confirmationOrderNumber">UMD-000000</strong><button class="copy-reference" id="copyOrderNumber">Copy</button></div><div class="confirmation-actions"><button class="button button-primary" data-page="orders">View my orders</button><button class="button button-outline" data-page="shop">Continue shopping</button></div></div>
+        </section>
+
+        <section class="page-view" id="page-account">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> YOUR DETAILS</div><h1>My account</h1><p class="muted">Manage the contact information used for your orders.</p></div></div>
+          <div class="account-layout"><form class="content-card account-form" id="accountForm"><div class="account-profile"><div class="account-avatar" id="accountAvatar">G</div><div><h3 id="accountDisplayName">Guest account</h3><p>Wholesale customer</p></div></div><div class="form-grid"><label class="form-field"><span>Full name</span><input name="fullName" type="text" placeholder="Your full name"></label><label class="form-field"><span>Email address</span><input name="email" type="email" placeholder="you@business.co.za"></label><label class="form-field"><span>Phone number</span><input name="phone" type="tel" placeholder="+27 00 000 0000"></label><label class="form-field"><span>Business name</span><input name="business" type="text" placeholder="Your business name"></label></div><button class="button button-primary" type="submit">Save details</button><p class="form-feedback" id="accountFeedback" aria-live="polite"></p></form><article class="content-card account-side"><span class="section-kicker">ACCOUNT ACTIVITY</span><h3>Your ordering history</h3><p>All the orders you submit from this device are saved here so you can return to them later.</p><div class="account-stat"><span>Total orders</span><strong id="accountOrderCount">0</strong></div><button class="text-button" data-page="orders">Go to my orders →</button></article></div>
+        </section>
+
+        <section class="page-view" id="page-help">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> WE'RE HERE TO HELP</div><h1>How can we help?</h1><p class="muted">Questions about bulk orders, pricing or delivery? Get in touch.</p></div></div>
+          <div class="help-grid"><article class="content-card help-main-card"><div class="help-large-icon">✳</div><span class="section-kicker">CUSTOMER SUPPORT</span><h2>Let's make ordering<br>simple.</h2><p>Our team can assist with product information, bulk quantities, pricing and delivery arrangements.</p><a class="button button-primary" href="mailto:info@umndenihealth.com?subject=Umndeni%20bulk%20order%20enquiry">Email Umndeni <span>↗</span></a><small>Update this email address to your preferred support contact when ready.</small></article><div class="help-side"><article class="content-card help-contact-card"><span class="help-card-icon">✉</span><h3>Email support</h3><p>Send us your question and we'll get back to you.</p><a href="mailto:info@umndenihealth.com">info@umndenihealth.com ↗</a></article><article class="content-card help-contact-card"><span class="help-card-icon">▤</span><h3>Order assistance</h3><p>Need to ask about an order you've already submitted?</p><button class="text-button" data-page="orders">View your orders →</button></article></div></div>
+          <div class="faq-section"><span class="section-kicker">QUICK ANSWERS</span><h2>Frequently asked questions</h2><details><summary>How do I place a bulk order?</summary><p>Visit Shop products, choose the number of boxes you need, add them to your cart and complete the checkout form.</p></details><details><summary>When will I know the price?</summary><p>Prices are currently confirmed by the Umndeni team after an order request is submitted.</p></details><details><summary>When do I pay?</summary><p>Submitting an order request does not take payment. The team will confirm pricing and the next steps with you.</p></details></div>
+        </section>
+
+        <footer class="main-footer"><span>© <span id="currentYear"></span> Umndeni Skin Care</span><span>Care that goes further.</span></footer>
+      </div>
+    </main>
+  </div>
+
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation"><button class="mobile-nav-link active" data-page="home"><span>⌂</span><small>Home</small></button><button class="mobile-nav-link" data-page="shop"><span>▦</span><small>Shop</small></button><button class="mobile-nav-link mobile-cart-link" id="mobileCart"><span>▣<i id="mobileCartBadge">0</i></span><small>Cart</small></button><button class="mobile-nav-link" data-page="orders"><span>▤</span><small>Orders</small></button><button class="mobile-nav-link" data-page="account"><span>◎</span><small>Account</small></button></nav>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
+    <div class="drawer-header"><div><span class="section-kicker">YOUR SELECTION</span><h2>Your cart <span id="drawerItemCount">(0)</span></h2></div><button class="icon-button close-drawer" id="closeCart" aria-label="Close cart">×</button></div>
+    <div class="drawer-body" id="cartContents"><div class="empty-state drawer-empty"><div class="empty-state-icon">▣</div><h3>Your cart is empty</h3><p>Add bulk boxes from the shop to get started.</p><button class="button button-primary" data-page="shop" id="emptyCartShop">Browse products</button></div></div>
+    <div class="drawer-footer" id="drawerFooter"><div class="summary-line"><span>Order total</span><strong>Price on request</strong></div><p>Pricing will be confirmed after you submit your request.</p><button class="button button-primary drawer-checkout" id="goCheckout">Continue to checkout <span>→</span></button></div>
+  </aside>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop" id="orderModalBackdrop"><section class="order-modal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle"><button class="icon-button modal-close" id="closeOrderModal" aria-label="Close">×</button><div id="orderModalContent"></div></section></div>
 </body>
 </html>
