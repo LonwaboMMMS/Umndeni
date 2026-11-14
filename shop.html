@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0E4366">
+  <meta name="description" content="Order Umndeni Skin Care petroleum jelly in bulk.">
+  <title>Umndeni | Wholesale Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <script src="assets/js/app.js" defer></script>
+</head>
+<body data-page="shop">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" data-page="home" aria-label="Umndeni home">
+        <span class="brand-mark">U</span>
+        <span class="brand-copy"><strong>umndeni</strong><small>SKIN CARE</small></span>
+      </a>
+
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <button class="nav-link active" data-page="home"><span class="nav-icon">⌂</span><span>Overview</span></button>
+        <button class="nav-link" data-page="shop"><span class="nav-icon">▦</span><span>Shop products</span></button>
+        <button class="nav-link" data-page="orders"><span class="nav-icon">▤</span><span>My orders</span><span class="nav-count" id="ordersNavCount">0</span></button>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-help">
+        <div class="help-icon">?</div>
+        <strong>Need a hand?</strong>
+        <p>We're here to help with your bulk orders.</p>
+        <button class="text-button" data-page="help">Get support <span>→</span></button>
+      </div>
+      <div class="sidebar-bottom">
+        <button class="nav-link" data-page="account"><span class="nav-icon">◎</span><span>My account</span></button>
+        <div class="sidebar-foot"><span class="online-dot"></span> Wholesale ordering portal</div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu icon-button" id="mobileMenu" aria-label="Open navigation">☰</button>
+          <div class="breadcrumb"><span>Umndeni</span><span class="crumb-slash">/</span><strong id="pageCrumb">Shop products</strong></div>
+        </div>
+        <div class="topbar-actions">
+          <div class="topbar-welcome"><span class="online-dot"></span> Wholesale portal</div>
+          <button class="cart-top-button" id="openCart" aria-label="Open shopping cart"><span class="cart-symbol">▣</span><span class="cart-label">Cart</span><span class="cart-badge" id="cartBadge">0</span></button>
+          <button class="avatar-button" data-page="account" aria-label="My account">G</button>
+        </div>
+      </header>
+
+      <div class="page-wrap">
+<section class="page-view active" id="page-shop">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> THE UMNDENI RANGE</div><h1>Shop products</h1><p class="muted">Choose your bulk quantity and add boxes to your order.</p></div><span class="catalog-tag">WHOLESALE CATALOGUE</span></div>
+          <div class="shop-layout">
+            <article class="product-detail-card">
+              <div class="product-visual">
+                <span class="visual-tag">UMNDENI SKIN CARE</span>
+                <div class="product-image-placeholder"><span class="placeholder-cross">✳</span><strong>PRODUCT<br>PHOTOGRAPHY</strong><small>Official product image placeholder</small></div>
+                <span class="visual-bottom">EVERYDAY SKIN CARE</span>
+              </div>
+              <div class="product-information">
+                <div class="product-meta"><span class="pill pill-green">Bulk product</span><span class="stock-indicator"><i></i> Available to order</span></div>
+                <h2>Umndeni Petroleum Jelly</h2>
+                <p class="product-description">Umndeni Skin Care petroleum jelly, available to retailers and bulk buyers. Select the number of boxes you'd like to order and submit your request.</p>
+                <div class="product-highlights"><div><span class="highlight-icon">✓</span><span>Bulk ordering</span></div><div><span class="highlight-icon">✓</span><span>Business-friendly ordering</span></div><div><span class="highlight-icon">✓</span><span>Delivery details at checkout</span></div></div>
+                <div class="product-purchase">
+                  <div><span class="field-label">PRICE</span><strong class="price-request">Price on request</strong><small>Pricing will be confirmed by Umndeni.</small></div>
+                  <div class="quantity-control"><button class="qty-btn" id="productQtyMinus" aria-label="Decrease quantity">−</button><span id="productQty">1</span><button class="qty-btn" id="productQtyPlus" aria-label="Increase quantity">＋</button></div>
+                </div>
+                <button class="button button-primary add-cart-button" id="addToCart">Add boxes to cart <span>→</span></button>
+                <div class="secure-note"><span>⌑</span> Your order request will be reviewed before payment.</div>
+              </div>
+            </article>
+            <aside class="shop-aside">
+              <article class="aside-card">
+                <div class="aside-icon">▣</div><h3>Ordering in bulk</h3><p>Add the number of boxes you need. You can update quantities in your cart before submitting your order.</p>
+                <div class="aside-divider"></div><div class="aside-feature"><span>01</span><div><strong>Choose your quantity</strong><small>Select how many boxes you need.</small></div></div><div class="aside-feature"><span>02</span><div><strong>Submit your details</strong><small>Tell us where to contact and deliver.</small></div></div><div class="aside-feature"><span>03</span><div><strong>We'll confirm your order</strong><small>Pricing and next steps will be confirmed.</small></div></div>
+              </article>
+              <article class="aside-note"><span class="note-icon">i</span><div><strong>Need a larger order?</strong><p>Contact our team if you'd like assistance with a bulk purchase.</p><button class="text-button" data-page="help">Contact support →</button></div></article>
+            </aside>
+          </div>
+        </section>
+        <footer class="main-footer"><span>© <span id="currentYear"></span> Umndeni Skin Care</span><span>Care that goes further.</span></footer>
+      </div>
+    </main>
+  </div>
+
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation"><button class="mobile-nav-link active" data-page="home"><span>⌂</span><small>Home</small></button><button class="mobile-nav-link" data-page="shop"><span>▦</span><small>Shop</small></button><button class="mobile-nav-link mobile-cart-link" id="mobileCart"><span>▣<i id="mobileCartBadge">0</i></span><small>Cart</small></button><button class="mobile-nav-link" data-page="orders"><span>▤</span><small>Orders</small></button><button class="mobile-nav-link" data-page="account"><span>◎</span><small>Account</small></button></nav>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
+    <div class="drawer-header"><div><span class="section-kicker">YOUR SELECTION</span><h2>Your cart <span id="drawerItemCount">(0)</span></h2></div><button class="icon-button close-drawer" id="closeCart" aria-label="Close cart">×</button></div>
+    <div class="drawer-body" id="cartContents"><div class="empty-state drawer-empty"><div class="empty-state-icon">▣</div><h3>Your cart is empty</h3><p>Add bulk boxes from the shop to get started.</p><button class="button button-primary" data-page="shop" id="emptyCartShop">Browse products</button></div></div>
+    <div class="drawer-footer" id="drawerFooter"><div class="summary-line"><span>Order total</span><strong id="drawerOrderTotal">Price on request</strong></div><p>Pricing will be confirmed after you submit your request.</p><button class="button button-primary drawer-checkout" id="goCheckout">Continue to checkout <span>→</span></button></div>
+  </aside>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop" id="orderModalBackdrop"><section class="order-modal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle"><button class="icon-button modal-close" id="closeOrderModal" aria-label="Close">×</button><div id="orderModalContent"></div></section></div>
+</body>
+</html>
