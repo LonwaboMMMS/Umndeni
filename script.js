@@ -334,11 +334,26 @@
   }
 
   function init() {
-    $("#currentYear").textContent = new Date().getFullYear();
-    $("#checkoutForm").elements.fullName.value = state.customer.fullName || "";
-    renderDashboard();
-    renderCart();
+    // Attach interactions first so a rendering issue cannot disable every button.
     bindEvents();
+
+    try {
+      $("#currentYear").textContent = new Date().getFullYear();
+      const nameField = $('#checkoutForm [name="fullName"]');
+      if (nameField) nameField.value = state.customer.fullName || "";
+      renderDashboard();
+      renderCart();
+    } catch (error) {
+      console.error("Umndeni app initialization error:", error);
+      showToast("The shop encountered a loading issue. Please refresh the page.");
+    }
+  }
+
+  // Works whether the script loads before or after DOMContentLoaded.
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
   }
 
   document.addEventListener("DOMContentLoaded", init);
