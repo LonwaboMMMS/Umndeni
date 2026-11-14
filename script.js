@@ -89,7 +89,7 @@
     $("#drawerOrderTotal").textContent = CONFIG.unitPrice === null ? "Price on request" : money(orderTotal(state.cart));
     $("#currentYear").textContent = new Date().getFullYear();
     $(".avatar-button").textContent = currentInitial();
-    $(".price-request").forEach(element => { element.textContent = priceLabel(); });
+    $$(".price-request").forEach(element => { element.textContent = priceLabel(); });
     renderRecentOrders();
   }
 
