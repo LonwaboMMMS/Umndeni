@@ -86,9 +86,10 @@
     $("#cartBadge").textContent = totalBoxes();
     $("#mobileCartBadge").textContent = totalBoxes();
     $("#drawerItemCount").textContent = "(" + totalBoxes() + ")";
+    $("#drawerOrderTotal").textContent = CONFIG.unitPrice === null ? "Price on request" : money(orderTotal(state.cart));
     $("#currentYear").textContent = new Date().getFullYear();
-    $("#avatarButton");
     $(".avatar-button").textContent = currentInitial();
+    $(".price-request").forEach(element => { element.textContent = priceLabel(); });
     renderRecentOrders();
   }
 
@@ -168,8 +169,9 @@
       return;
     }
     $("#checkoutItems").innerHTML = state.cart.map(item => `
-      <div class="checkout-item"><div class="checkout-item-art">U</div><div class="checkout-item-info"><strong>${escapeHTML(item.name)}</strong><small>${item.quantity} bulk box(es)</small></div><span class="checkout-item-price">${priceLabel()}</span></div>`).join("");
+      <div class="checkout-item"><div class="checkout-item-art">U</div><div class="checkout-item-info"><strong>${escapeHTML(item.name)}</strong><small>${item.quantity} bulk box(es)</small></div><span class="checkout-item-price">${CONFIG.unitPrice === null ? priceLabel() : money(item.quantity * CONFIG.unitPrice)}</span></div>`).join("");
     $("#checkoutBoxCount").textContent = totalBoxes() + (totalBoxes() === 1 ? " box" : " boxes");
+    $("#checkoutOrderTotal").textContent = CONFIG.unitPrice === null ? "Price on request" : money(orderTotal(state.cart));
     const form = $("#checkoutForm");
     ["fullName", "email", "phone", "business", "address", "city", "province", "postalCode"].forEach(name => {
       if (form.elements[name] && state.customer[name]) form.elements[name].value = state.customer[name];
