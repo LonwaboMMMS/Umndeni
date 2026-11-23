@@ -22,9 +22,9 @@
 
       <div class="workspace-label">WORKSPACE</div>
       <nav class="side-nav" aria-label="Main navigation">
-        <button class="nav-link active" data-page="home"><span class="nav-icon">⌂</span><span>Overview</span></button>
-        <button class="nav-link" data-page="shop"><span class="nav-icon">▦</span><span>Shop products</span></button>
-        <button class="nav-link" data-page="orders"><span class="nav-icon">▤</span><span>My orders</span><span class="nav-count" id="ordersNavCount">0</span></button>
+        <button type="button" class="nav-link active" data-page="home"><span class="nav-icon">⌂</span><span>Overview</span></button>
+        <button type="button" class="nav-link" data-page="shop"><span class="nav-icon">▦</span><span>Shop products</span></button>
+        <button type="button" class="nav-link" data-page="orders"><span class="nav-icon">▤</span><span>My orders</span><span class="nav-count" id="ordersNavCount">0</span></button>
       </nav>
 
       <div class="sidebar-spacer"></div>
@@ -32,10 +32,10 @@
         <div class="help-icon">?</div>
         <strong>Need a hand?</strong>
         <p>We're here to help with your bulk orders.</p>
-        <button class="text-button" data-page="help">Get support <span>→</span></button>
+        <button type="button" class="text-button" data-page="help">Get support <span>→</span></button>
       </div>
       <div class="sidebar-bottom">
-        <button class="nav-link" data-page="account"><span class="nav-icon">◎</span><span>My account</span></button>
+        <button type="button" class="nav-link" data-page="account"><span class="nav-icon">◎</span><span>My account</span></button>
         <div class="sidebar-foot"><span class="online-dot"></span> Wholesale ordering portal</div>
       </div>
     </aside>
@@ -43,13 +43,13 @@
     <main class="main-area">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="mobile-menu icon-button" id="mobileMenu" aria-label="Open navigation">☰</button>
+          <button type="button" class="mobile-menu icon-button" id="mobileMenu" aria-label="Open navigation">☰</button>
           <div class="breadcrumb"><span>Umndeni</span><span class="crumb-slash">/</span><strong id="pageCrumb">Shop products</strong></div>
         </div>
         <div class="topbar-actions">
           <div class="topbar-welcome"><span class="online-dot"></span> Wholesale portal</div>
           <button type="button" class="cart-top-button" id="openCart" aria-label="Open shopping cart"><span class="cart-symbol">▣</span><span class="cart-label">Cart</span><span class="cart-badge" id="cartBadge">0</span></button>
-          <button class="avatar-button" data-page="account" aria-label="My account">G</button>
+          <button type="button" class="avatar-button" data-page="account" aria-label="My account">G</button>
         </div>
       </header>
 
@@ -70,9 +70,9 @@
                 <div class="product-highlights"><div><span class="highlight-icon">✓</span><span>Bulk ordering</span></div><div><span class="highlight-icon">✓</span><span>Business-friendly ordering</span></div><div><span class="highlight-icon">✓</span><span>Delivery details at checkout</span></div></div>
                 <div class="product-purchase">
                   <div class="package-choice"><label class="field-label" for="packageSelect">SELECT PACKAGE</label><select class="package-select" id="packageSelect"><option value="umndeni-petroleum-jelly-100g">80 units × 100g — R1,800</option><option value="umndeni-petroleum-jelly-250g">48 units × 250g — R1,920</option></select><strong class="price-request" id="productPrice">R1,800</strong><small id="packageDescription">80 units × 100g per package</small></div>
-                  <div class="quantity-control"><button class="qty-btn" id="productQtyMinus" aria-label="Decrease quantity">−</button><span id="productQty">1</span><button class="qty-btn" id="productQtyPlus" aria-label="Increase quantity">＋</button></div>
+                  <div class="quantity-control"><button type="button" class="qty-btn" id="productQtyMinus" aria-label="Decrease quantity">−</button><span id="productQty">1</span><button type="button" class="qty-btn" id="productQtyPlus" aria-label="Increase quantity">＋</button></div>
                 </div>
-                <button class="button button-primary add-cart-button" id="addToCart">Add packages to cart <span>→</span></button>
+                <button type="button" class="button button-primary add-cart-button" id="addToCart">Add packages to cart <span>→</span></button>
                 <div class="secure-note"><span>⌑</span> Your order request will be reviewed before payment.</div>
               </div>
             </article>
@@ -81,7 +81,7 @@
                 <div class="aside-icon">▣</div><h3>Ordering in bulk</h3><p>Choose either package size, then select how many packages you need. You can update quantities in your cart before submitting your order.</p>
                 <div class="aside-divider"></div><div class="aside-feature"><span>01</span><div><strong>Choose your quantity</strong><small>Select how many boxes you need.</small></div></div><div class="aside-feature"><span>02</span><div><strong>Submit your details</strong><small>Tell us where to contact and deliver.</small></div></div><div class="aside-feature"><span>03</span><div><strong>We'll confirm your order</strong><small>Your package prices are displayed upfront. Delivery will be confirmed.</small></div></div>
               </article>
-              <article class="aside-note"><span class="note-icon">i</span><div><strong>Need a larger order?</strong><p>Contact our team if you'd like assistance with a bulk purchase.</p><button class="text-button" data-page="help">Contact support →</button></div></article>
+              <article class="aside-note"><span class="note-icon">i</span><div><strong>Need a larger order?</strong><p>Contact our team if you'd like assistance with a bulk purchase.</p><button type="button" class="text-button" data-page="help">Contact support →</button></div></article>
             </aside>
           </div>
         </section>
@@ -91,15 +91,15 @@
   </div>
 
   <div class="mobile-overlay" id="mobileOverlay"></div>
-  <nav class="mobile-bottom-nav" aria-label="Mobile navigation"><button class="mobile-nav-link active" data-page="home"><span>⌂</span><small>Home</small></button><button class="mobile-nav-link" data-page="shop"><span>▦</span><small>Shop</small></button><button type="button" class="mobile-nav-link mobile-cart-link" id="mobileCart"><span>▣<i id="mobileCartBadge">0</i></span><small>Cart</small></button><button class="mobile-nav-link" data-page="orders"><span>▤</span><small>Orders</small></button><button class="mobile-nav-link" data-page="account"><span>◎</span><small>Account</small></button></nav>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation"><button type="button" class="mobile-nav-link active" data-page="home"><span>⌂</span><small>Home</small></button><button type="button" class="mobile-nav-link" data-page="shop"><span>▦</span><small>Shop</small></button><button type="button" class="mobile-nav-link mobile-cart-link" id="mobileCart"><span>▣<i id="mobileCartBadge">0</i></span><small>Cart</small></button><button type="button" class="mobile-nav-link" data-page="orders"><span>▤</span><small>Orders</small></button><button type="button" class="mobile-nav-link" data-page="account"><span>◎</span><small>Account</small></button></nav>
 
   <div class="drawer-backdrop" id="drawerBackdrop"></div>
   <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
-    <div class="drawer-header"><div><span class="section-kicker">YOUR SELECTION</span><h2>Your cart <span id="drawerItemCount">(0)</span></h2></div><button class="icon-button close-drawer" id="closeCart" aria-label="Close cart">×</button></div>
-    <div class="drawer-body" id="cartContents"><div class="empty-state drawer-empty"><div class="empty-state-icon">▣</div><h3>Your cart is empty</h3><p>Add bulk boxes from the shop to get started.</p><button class="button button-primary" data-page="shop" id="emptyCartShop">Browse products</button></div></div>
-    <div class="drawer-footer" id="drawerFooter"><div class="summary-line"><span>Order total</span><strong id="drawerOrderTotal">Price on request</strong></div><p>Delivery charges, if applicable, will be confirmed before payment.</p><button class="button button-primary drawer-checkout" id="goCheckout">Continue to checkout <span>→</span></button></div>
+    <div class="drawer-header"><div><span class="section-kicker">YOUR SELECTION</span><h2>Your cart <span id="drawerItemCount">(0)</span></h2></div><button type="button" class="icon-button close-drawer" id="closeCart" aria-label="Close cart">×</button></div>
+    <div class="drawer-body" id="cartContents"><div class="empty-state drawer-empty"><div class="empty-state-icon">▣</div><h3>Your cart is empty</h3><p>Add bulk boxes from the shop to get started.</p><button type="button" class="button button-primary" data-page="shop" id="emptyCartShop">Browse products</button></div></div>
+    <div class="drawer-footer" id="drawerFooter"><div class="summary-line"><span>Order total</span><strong id="drawerOrderTotal">Price on request</strong></div><p>Delivery charges, if applicable, will be confirmed before payment.</p><button type="button" class="button button-primary drawer-checkout" id="goCheckout">Continue to checkout <span>→</span></button></div>
   </aside>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <div class="modal-backdrop" id="orderModalBackdrop"><section class="order-modal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle"><button class="icon-button modal-close" id="closeOrderModal" aria-label="Close">×</button><div id="orderModalContent"></div></section></div>
+  <div class="modal-backdrop" id="orderModalBackdrop"><section class="order-modal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle"><button type="button" class="icon-button modal-close" id="closeOrderModal" aria-label="Close">×</button><div id="orderModalContent"></div></section></div>
 </body>
 </html>
