@@ -170,8 +170,8 @@ final class Umndeni_Shop_Core {
         $business = $this->input_text($request, 'business');
         $password = (string) $request->get_param('password');
 
-        if (!$name || !is_email($email) || strlen($password) < 10) {
-            return new WP_Error('invalid_registration', 'Enter your name, a valid email and a password of at least 10 characters.', array('status' => 400));
+        if (!$name || !is_email($email) || strlen($password) < 8) {
+            return new WP_Error('invalid_registration', 'Enter your name, a valid email and a password of at least 8 characters.', array('status' => 400));
         }
         if (email_exists($email)) return new WP_Error('email_exists', 'An account already exists for this email. Please log in.', array('status' => 409));
 
