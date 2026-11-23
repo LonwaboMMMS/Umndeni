@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Umndeni Shop Core
  * Description: WordPress customer accounts, Google sign-in, customer profiles and persistent shop orders for the Umndeni static shop.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Reverb Daily Media
  * Requires at least: 6.2
  * Requires PHP: 7.4
@@ -11,7 +11,7 @@
 if (!defined('ABSPATH')) exit;
 
 final class Umndeni_Shop_Core {
-    const VERSION = '1.0.0';
+    const VERSION = '1.1.0';
     const REST_NS = 'umndeni/v1';
     const OPTION = 'umndn_shop_settings';
 
@@ -426,6 +426,7 @@ final class Umndeni_Shop_Core {
         $data = $request->get_body_params();
         if (empty($data) && !empty($_POST)) $data = wp_unslash($_POST);
         if (empty($data['signature'])) return new WP_Error('invalid_signature', 'Missing PayFast signature.', array('status' => 400));
+        if (empty($settings['payfast_merchant_id']) || !isset($data['merchant_id']) || !hash_equals((string) $settings['payfast_merchant_id'], (string) $data['merchant_id'])) return new WP_Error('invalid_merchant', 'PayFast merchant could not be verified.', array('status' => 403));
         $provided = sanitize_text_field($data['signature']);
         $expected = $this->payfast_signature($data, (string) ($settings['payfast_passphrase'] ?? ''));
         if (!hash_equals($expected, $provided)) return new WP_Error('invalid_signature', 'PayFast signature verification failed.', array('status' => 400));
@@ -462,10 +463,10 @@ final class Umndeni_Shop_Core {
     public function sanitize_settings($input) {
         return array(
             'google_client_id' => isset($input['google_client_id']) ? sanitize_text_field($input['google_client_id']) : '',
-            'google_client_secret' => isset($input['google_client_secret']) ? sanitize_text_field($input['google_client_secret']) : '',
+            'google_client_secret' => !empty($input['google_client_secret']) ? sanitize_text_field($input['google_client_secret']) : (get_option(self::OPTION, array())['google_client_secret'] ?? ''),
             'payfast_merchant_id' => isset($input['payfast_merchant_id']) ? sanitize_text_field($input['payfast_merchant_id']) : '',
-            'payfast_merchant_key' => isset($input['payfast_merchant_key']) ? sanitize_text_field($input['payfast_merchant_key']) : '',
-            'payfast_passphrase' => isset($input['payfast_passphrase']) ? sanitize_text_field($input['payfast_passphrase']) : '',
+            'payfast_merchant_key' => !empty($input['payfast_merchant_key']) ? sanitize_text_field($input['payfast_merchant_key']) : (get_option(self::OPTION, array())['payfast_merchant_key'] ?? ''),
+            'payfast_passphrase' => !empty($input['payfast_passphrase']) ? sanitize_text_field($input['payfast_passphrase']) : (get_option(self::OPTION, array())['payfast_passphrase'] ?? ''),
             'payfast_sandbox' => !empty($input['payfast_sandbox']) ? 1 : 0
         );
     }
@@ -482,10 +483,10 @@ final class Umndeni_Shop_Core {
         echo '<div class="wrap"><h1>Umndeni Shop Settings</h1><form method="post" action="options.php">';
         settings_fields('umndn_shop_settings_group');
         echo '<table class="form-table"><tr><th>Google OAuth Client ID</th><td><input class="regular-text" name="' . esc_attr(self::OPTION) . '[google_client_id]" value="' . esc_attr($settings['google_client_id'] ?? '') . '"></td></tr>';
-        echo '<tr><th>Google OAuth Client Secret</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[google_client_secret]" value="' . esc_attr($settings['google_client_secret'] ?? '') . '"></td></tr></table>';
+        echo '<tr><th>Google OAuth Client Secret</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[google_client_secret]" value="" placeholder="Leave blank to keep saved secret"></td></tr></table>';
         echo '<h2>PayFast Payments</h2><table class="form-table"><tr><th>Merchant ID</th><td><input class="regular-text" name="' . esc_attr(self::OPTION) . '[payfast_merchant_id]" value="' . esc_attr($settings['payfast_merchant_id'] ?? '') . '"></td></tr>';
-        echo '<tr><th>Merchant Key</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[payfast_merchant_key]" value="' . esc_attr($settings['payfast_merchant_key'] ?? '') . '"></td></tr>';
-        echo '<tr><th>Passphrase</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[payfast_passphrase]" value="' . esc_attr($settings['payfast_passphrase'] ?? '') . '"></td></tr>';
+        echo '<tr><th>Merchant Key</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[payfast_merchant_key]" value="" placeholder="Leave blank to keep saved key"></td></tr>';
+        echo '<tr><th>Passphrase</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[payfast_passphrase]" value="" placeholder="Leave blank to keep saved passphrase"></td></tr>';
         echo '<tr><th>Environment</th><td><label><input type="checkbox" name="' . esc_attr(self::OPTION) . '[payfast_sandbox]" value="1" ' . checked(!empty($settings['payfast_sandbox']), true, false) . '> Enable sandbox/test mode</label></td></tr></table>';
         echo '<p><strong>PayFast ITN URL:</strong><br><code>' . esc_url(rest_url(self::REST_NS . '/payfast/itn')) . '</code></p>';
         echo '<p><strong>Google authorised redirect URI:</strong><br><code>' . $redirect . '</code></p>';
