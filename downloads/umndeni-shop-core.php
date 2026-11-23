@@ -346,7 +346,7 @@ final class Umndeni_Shop_Core {
 
     public function admin_menu() {
         add_options_page('Umndeni Shop', 'Umndeni Shop', 'manage_options', 'umndeni-shop', array($this, 'settings_page'));
-        add_menu_page('Umndeni Orders', 'Umndeni Orders', 'manage_options', 'umndeni-orders', array($this, 'orders_page'), 'dashicons-store',  woocommerce_menu_order() ? 56 : 56);
+        add_menu_page('Umndeni Orders', 'Umndeni Orders', 'manage_options', 'umndeni-orders', array($this, 'orders_page'), 'dashicons-store',  56);
     }
 
     public function settings_page() {
