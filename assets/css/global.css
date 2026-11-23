@@ -154,7 +154,7 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
 .highlight-icon { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: #EDF7EE; color: var(--green); font-size: 10px; font-weight: 700; }
 .product-purchase { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 17px; }
 .field-label { display: block; margin-bottom: 5px; color: #9AA7AE; font-size: 8px; font-weight: 700; letter-spacing: 1.2px; }
-.price-request { display: block; color: var(--navy); font: 800 15px Manrope,sans-serif; }
+.package-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; flex: 1; }\n.package-select { width: 100%; max-width: 310px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; background: white; color: var(--navy); font: 600 10px "DM Sans",sans-serif; }\n.price-request { display: block; color: var(--navy); font: 800 15px Manrope,sans-serif; }
 .product-purchase small { display: block; margin-top: 4px; color: #98A5AC; font-size: 8px; }
 .quantity-control { display: flex; align-items: center; gap: 13px; padding: 5px; border: 1px solid var(--line); border-radius: 8px; color: var(--navy); font-size: 11px; font-weight: 700; }
 .qty-btn { display: grid; place-items: center; width: 27px; height: 27px; border: 0; border-radius: 6px; background: #F1F6F7; color: var(--navy); font-size: 15px; }
