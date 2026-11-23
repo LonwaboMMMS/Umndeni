@@ -28,6 +28,7 @@ final class Umndeni_Shop_Core {
         add_action('admin_menu', array($this, 'admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
         add_action('init', array($this, 'google_oauth_routes'));
+        add_action('rest_api_init', array($this, 'register_payfast_routes'));
     }
 
     private function tables() {
@@ -72,6 +73,7 @@ final class Umndeni_Shop_Core {
             status varchar(30) NOT NULL DEFAULT 'pending',
             payment_status varchar(30) NOT NULL DEFAULT 'unpaid',
             payment_reference varchar(100) NOT NULL DEFAULT '',
+            access_token_hash char(64) NOT NULL DEFAULT '',
             created_at datetime NOT NULL,
             updated_at datetime NOT NULL,
             PRIMARY KEY  (id),
@@ -95,7 +97,7 @@ final class Umndeni_Shop_Core {
         ) $collate;");
 
         if (!get_option(self::OPTION)) {
-            add_option(self::OPTION, array('google_client_id' => '', 'google_client_secret' => ''));
+            add_option(self::OPTION, array('google_client_id' => '', 'google_client_secret' => '', 'payfast_merchant_id' => '', 'payfast_merchant_key' => '', 'payfast_passphrase' => '', 'payfast_sandbox' => 1));
         }
     }
 
@@ -272,6 +274,7 @@ final class Umndeni_Shop_Core {
         $delivery_fee = max(0, (float) $request->get_param('delivery_fee'));
         if ($delivery_fee > 5000) return new WP_Error('invalid_delivery', 'Delivery fee is invalid.', array('status' => 400));
         $user_id = is_user_logged_in() ? get_current_user_id() : null;
+        $access_token = wp_generate_password(48, false, false);
         $t = $this->tables(); $now = current_time('mysql');
         $number = 'UMN-' . gmdate('ymd') . '-' . strtoupper(wp_generate_password(6, false, false));
         $wpdb->insert($t['orders'], array(
@@ -280,12 +283,12 @@ final class Umndeni_Shop_Core {
             'delivery_address' => sanitize_textarea_field((string) $request->get_param('delivery_address')),
             'delivery_method' => $this->input_text($request, 'delivery_method', 80),
             'subtotal' => $subtotal, 'delivery_fee' => $delivery_fee, 'total' => $subtotal + $delivery_fee,
-            'status' => 'pending', 'payment_status' => 'unpaid', 'created_at' => $now, 'updated_at' => $now
+            'status' => 'pending', 'payment_status' => 'pending', 'access_token_hash' => hash('sha256', $access_token), 'created_at' => $now, 'updated_at' => $now
         ));
         $order_id = (int) $wpdb->insert_id;
         if (!$order_id) return new WP_Error('order_failed', 'The order could not be saved. Please try again.', array('status' => 500));
         foreach ($clean_items as $item) $wpdb->insert($t['items'], $item + array('order_id' => $order_id));
-        return new WP_REST_Response(array('success' => true, 'order_id' => $order_id, 'order_number' => $number, 'total' => $subtotal + $delivery_fee, 'payment_status' => 'unpaid'), 201);
+        return new WP_REST_Response(array('success' => true, 'order_id' => $order_id, 'order_number' => $number, 'total' => $subtotal + $delivery_fee, 'payment_status' => 'pending', 'payment_token' => $access_token), 201);
     }
 
     private function order_data($order) {
@@ -335,6 +338,123 @@ final class Umndeni_Shop_Core {
         return rest_ensure_response(array('success' => true));
     }
 
+
+    public function register_payfast_routes() {
+        register_rest_route(self::REST_NS, '/orders/(?P<id>\\d+)/payfast', array(
+            'methods' => 'POST', 'callback' => array($this, 'start_payfast_payment'),
+            'permission_callback' => '__return_true'
+        ));
+        register_rest_route(self::REST_NS, '/payfast/itn', array(
+            'methods' => 'POST', 'callback' => array($this, 'payfast_itn'),
+            'permission_callback' => '__return_true'
+        ));
+    }
+
+    private function payfast_settings() {
+        return get_option(self::OPTION, array());
+    }
+
+    private function payfast_signature($data, $passphrase = '') {
+        unset($data['signature']);
+        $parts = array();
+        foreach ($data as $key => $value) {
+            if ($value !== '' && $value !== null) $parts[] = $key . '=' . urlencode(trim((string) $value));
+        }
+        $query = implode('&', $parts);
+        if ($passphrase !== '') $query .= '&passphrase=' . urlencode(trim($passphrase));
+        return md5($query);
+    }
+
+    public function start_payfast_payment($request) {
+        global $wpdb;
+        $settings = $this->payfast_settings();
+        if (empty($settings['payfast_merchant_id']) || empty($settings['payfast_merchant_key'])) {
+            return new WP_Error('payfast_not_configured', 'PayFast has not been configured by the shop administrator.', array('status' => 503));
+        }
+        $t = $this->tables();
+        $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$t['orders']} WHERE id = %d", absint($request['id'])));
+        if (!$order) return new WP_Error('order_not_found', 'Order not found.', array('status' => 404));
+        $token = sanitize_text_field((string) $request->get_param('payment_token'));
+        $is_owner = is_user_logged_in() && (int) $order->user_id === get_current_user_id();
+        $is_guest_token = $token && !empty($order->access_token_hash) && hash_equals($order->access_token_hash, hash('sha256', $token));
+        if (!$is_owner && !$is_guest_token && !current_user_can('manage_options')) {
+            return new WP_Error('forbidden', 'You are not authorised to pay for this order.', array('status' => 403));
+        }
+        if ($order->payment_status === 'paid') return new WP_Error('already_paid', 'This order has already been paid.', array('status' => 409));
+        $amount = number_format((float) $order->total, 2, '.', '');
+        if ((float) $amount < 5) return new WP_Error('minimum_amount', 'PayFast requires a payment of at least R5.00.', array('status' => 400));
+        $first = sanitize_text_field((string) strtok($order->customer_name, ' '));
+        $last = trim(substr($order->customer_name, strlen($first)));
+        $base = home_url('/shop/confirmation.html');
+        $data = array(
+            'merchant_id' => (string) $settings['payfast_merchant_id'],
+            'merchant_key' => (string) $settings['payfast_merchant_key'],
+            'return_url' => add_query_arg(array('payment' => 'return', 'order' => rawurlencode($order->order_number)), $base),
+            'cancel_url' => add_query_arg(array('payment' => 'cancel', 'order' => rawurlencode($order->order_number)), $base),
+            'notify_url' => rest_url(self::REST_NS . '/payfast/itn'),
+            'name_first' => $first,
+            'name_last' => $last,
+            'email_address' => $order->customer_email,
+            'm_payment_id' => $order->order_number,
+            'amount' => $amount,
+            'item_name' => 'Umndeni Shop Order ' . $order->order_number
+        );
+        $data['signature'] = $this->payfast_signature($data, (string) ($settings['payfast_passphrase'] ?? ''));
+        $wpdb->update($t['orders'], array('payment_status' => 'pending', 'updated_at' => current_time('mysql')), array('id' => $order->id));
+        return rest_ensure_response(array(
+            'success' => true,
+            'action' => !empty($settings['payfast_sandbox']) ? 'https://sandbox.payfast.co.za/eng/process' : 'https://www.payfast.co.za/eng/process',
+            'fields' => $data
+        ));
+    }
+
+    private function payfast_valid_source_ip() {
+        $remote = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '';
+        if (!$remote || !filter_var($remote, FILTER_VALIDATE_IP)) return false;
+        $hosts = array('www.payfast.co.za', 'w1w.payfast.co.za', 'w2w.payfast.co.za', 'sandbox.payfast.co.za');
+        $ips = array();
+        foreach ($hosts as $host) {
+            $resolved = gethostbynamel($host);
+            if (is_array($resolved)) $ips = array_merge($ips, $resolved);
+        }
+        return in_array($remote, array_unique($ips), true);
+    }
+
+    public function payfast_itn($request) {
+        global $wpdb;
+        $settings = $this->payfast_settings();
+        $data = $request->get_body_params();
+        if (empty($data) && !empty($_POST)) $data = wp_unslash($_POST);
+        if (empty($data['signature'])) return new WP_Error('invalid_signature', 'Missing PayFast signature.', array('status' => 400));
+        $provided = sanitize_text_field($data['signature']);
+        $expected = $this->payfast_signature($data, (string) ($settings['payfast_passphrase'] ?? ''));
+        if (!hash_equals($expected, $provided)) return new WP_Error('invalid_signature', 'PayFast signature verification failed.', array('status' => 400));
+        if (!$this->payfast_valid_source_ip()) return new WP_Error('invalid_source', 'Payment notification source could not be verified.', array('status' => 403));
+        $sandbox = !empty($settings['payfast_sandbox']);
+        $validate_url = $sandbox ? 'https://sandbox.payfast.co.za/eng/query/validate' : 'https://www.payfast.co.za/eng/query/validate';
+        $validation = wp_remote_post($validate_url, array('timeout' => 20, 'body' => $data));
+        if (is_wp_error($validation) || wp_remote_retrieve_response_code($validation) !== 200 || trim(wp_remote_retrieve_body($validation)) !== 'VALID') {
+            return new WP_Error('itn_validation_failed', 'PayFast transaction validation failed.', array('status' => 400));
+        }
+        if (empty($data['m_payment_id']) || empty($data['payment_status']) || $data['payment_status'] !== 'COMPLETE') {
+            return new WP_REST_Response(array('received' => true, 'ignored' => true), 200);
+        }
+        $t = $this->tables();
+        $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$t['orders']} WHERE order_number = %s", sanitize_text_field($data['m_payment_id'])));
+        if (!$order) return new WP_Error('order_not_found', 'Matching order not found.', array('status' => 404));
+        if (number_format((float) $order->total, 2, '.', '') !== number_format((float) ($data['amount_gross'] ?? 0), 2, '.', '')) {
+            return new WP_Error('amount_mismatch', 'Payment amount does not match the order total.', array('status' => 400));
+        }
+        if ($order->payment_status !== 'paid') {
+            $wpdb->update($t['orders'], array(
+                'payment_status' => 'paid', 'status' => 'processing',
+                'payment_reference' => sanitize_text_field($data['pf_payment_id'] ?? ''),
+                'updated_at' => current_time('mysql')
+            ), array('id' => $order->id));
+        }
+        return new WP_REST_Response(array('received' => true), 200);
+    }
+
     public function register_settings() {
         register_setting('umndn_shop_settings_group', self::OPTION, array($this, 'sanitize_settings'));
     }
@@ -342,7 +462,11 @@ final class Umndeni_Shop_Core {
     public function sanitize_settings($input) {
         return array(
             'google_client_id' => isset($input['google_client_id']) ? sanitize_text_field($input['google_client_id']) : '',
-            'google_client_secret' => isset($input['google_client_secret']) ? sanitize_text_field($input['google_client_secret']) : ''
+            'google_client_secret' => isset($input['google_client_secret']) ? sanitize_text_field($input['google_client_secret']) : '',
+            'payfast_merchant_id' => isset($input['payfast_merchant_id']) ? sanitize_text_field($input['payfast_merchant_id']) : '',
+            'payfast_merchant_key' => isset($input['payfast_merchant_key']) ? sanitize_text_field($input['payfast_merchant_key']) : '',
+            'payfast_passphrase' => isset($input['payfast_passphrase']) ? sanitize_text_field($input['payfast_passphrase']) : '',
+            'payfast_sandbox' => !empty($input['payfast_sandbox']) ? 1 : 0
         );
     }
 
@@ -359,6 +483,11 @@ final class Umndeni_Shop_Core {
         settings_fields('umndn_shop_settings_group');
         echo '<table class="form-table"><tr><th>Google OAuth Client ID</th><td><input class="regular-text" name="' . esc_attr(self::OPTION) . '[google_client_id]" value="' . esc_attr($settings['google_client_id'] ?? '') . '"></td></tr>';
         echo '<tr><th>Google OAuth Client Secret</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[google_client_secret]" value="' . esc_attr($settings['google_client_secret'] ?? '') . '"></td></tr></table>';
+        echo '<h2>PayFast Payments</h2><table class="form-table"><tr><th>Merchant ID</th><td><input class="regular-text" name="' . esc_attr(self::OPTION) . '[payfast_merchant_id]" value="' . esc_attr($settings['payfast_merchant_id'] ?? '') . '"></td></tr>';
+        echo '<tr><th>Merchant Key</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[payfast_merchant_key]" value="' . esc_attr($settings['payfast_merchant_key'] ?? '') . '"></td></tr>';
+        echo '<tr><th>Passphrase</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[payfast_passphrase]" value="' . esc_attr($settings['payfast_passphrase'] ?? '') . '"></td></tr>';
+        echo '<tr><th>Environment</th><td><label><input type="checkbox" name="' . esc_attr(self::OPTION) . '[payfast_sandbox]" value="1" ' . checked(!empty($settings['payfast_sandbox']), true, false) . '> Enable sandbox/test mode</label></td></tr></table>';
+        echo '<p><strong>PayFast ITN URL:</strong><br><code>' . esc_url(rest_url(self::REST_NS . '/payfast/itn')) . '</code></p>';
         echo '<p><strong>Google authorised redirect URI:</strong><br><code>' . $redirect . '</code></p>';
         submit_button(); echo '</form><hr><p>REST API base: <code>' . esc_html(rest_url(self::REST_NS . '/')) . '</code></p></div>';
     }
