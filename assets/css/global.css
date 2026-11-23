@@ -340,7 +340,7 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
 }
 @media (max-width: 680px) {
   body { padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
-  .sidebar { width: 270px; max-width: 84vw; transform: translateX(-105%); transition: transform .25s ease; box-shadow: 12px 0 35px rgba(0,0,0,.08); }
+  .sidebar { width: 270px; max-width: 84vw; max-height: 100dvh; overflow-y: auto; padding-bottom: calc(82px + env(safe-area-inset-bottom)); transform: translateX(-105%); transition: transform .25s ease; box-shadow: 12px 0 35px rgba(0,0,0,.08); scrollbar-width: none; }
   .sidebar.mobile-open { transform: translateX(0); }
   .mobile-overlay { position: fixed; inset: 0; z-index: 25; display: block; visibility: hidden; background: rgba(8,34,49,.35); opacity: 0; transition: .2s; }
   .mobile-overlay.open { visibility: visible; opacity: 1; }
