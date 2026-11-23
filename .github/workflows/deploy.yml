@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    name: Upload Store
+    name: Upload Shop
     runs-on: ubuntu-latest
 
     steps:
