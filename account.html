@@ -10,7 +10,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/global.css">
-  <script src="assets/js/app.js?v=packages5" defer></script>
+  <script src="assets/js/app.js?v=account-auth1" defer></script>
+<style>
+#accountArea .auth-tabs{display:flex;gap:10px;margin:22px 0}
+#accountArea .auth-tabs button{min-width:110px}
+#accountArea form{margin-top:18px}
+#accountArea form[hidden]{display:none!important}
+#accountArea #googleSignIn{margin-top:16px}
+#accountArea #googleSignIn:empty{display:none}
+#accountArea #logoutButton{margin-left:10px}
+@media(max-width:600px){#accountArea .auth-tabs button{flex:1}#accountArea #logoutButton{margin:12px 0 0 0}}
+</style>
 </head>
 <body data-page="account">
   <div class="app-shell">
@@ -56,7 +66,7 @@
       <div class="page-wrap">
 <section class="page-view active" id="page-account">
           <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> YOUR DETAILS</div><h1>My account</h1><p class="muted">Manage the contact information used for your orders.</p></div></div>
-          <div class="account-layout"><form class="content-card account-form" id="accountForm"><div class="account-profile"><div class="account-avatar" id="accountAvatar">G</div><div><h3 id="accountDisplayName">Guest account</h3><p>Wholesale customer</p></div></div><div class="form-grid"><label class="form-field"><span>Full name</span><input name="fullName" type="text" placeholder="Your full name"></label><label class="form-field"><span>Email address</span><input name="email" type="email" placeholder="you@business.co.za"></label><label class="form-field"><span>Phone number</span><input name="phone" type="tel" placeholder="+27 00 000 0000"></label><label class="form-field"><span>Business name</span><input name="business" type="text" placeholder="Your business name"></label></div><button class="button button-primary" type="submit">Save details</button><p class="form-feedback" id="accountFeedback" aria-live="polite"></p></form><article class="content-card account-side"><span class="section-kicker">ACCOUNT ACTIVITY</span><h3>Your ordering history</h3><p>All the orders you submit from this device are saved here so you can return to them later.</p><div class="account-stat"><span>Total orders</span><strong id="accountOrderCount">0</strong></div><button class="text-button" data-page="orders">Go to my orders →</button></article></div>
+          <div id="accountArea" class="account-layout"><div class="content-card"><p>Loading your account…</p></div></div>
         </section>
         <footer class="main-footer"><span>© <span id="currentYear"></span> Umndeni Skin Care</span><span>Care that goes further.</span></footer>
       </div>
