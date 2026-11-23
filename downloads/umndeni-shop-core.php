@@ -155,6 +155,8 @@ final class Umndeni_Shop_Core {
         ));
     }
 
+    private function customer_role() { return get_role('customer') ? 'customer' : 'subscriber'; }
+
     private function input_text($request, $key, $max = 190) {
         return sanitize_text_field((string) $request->get_param($key));
     }
@@ -178,7 +180,7 @@ final class Umndeni_Shop_Core {
 
         $user_id = wp_insert_user(array(
             'user_login' => $username, 'user_pass' => $password, 'user_email' => $email,
-            'display_name' => $name, 'first_name' => $name, 'role' => 'customer'
+            'display_name' => $name, 'first_name' => $name, 'role' => $this->customer_role()
         ));
         if (is_wp_error($user_id)) return $user_id;
 
@@ -416,7 +418,7 @@ final class Umndeni_Shop_Core {
         if (!$user) {
             $base = sanitize_user(current(explode('@', $email)), true); if (!$base) $base = 'googleuser';
             $username = $base; $i = 1; while (username_exists($username)) { $username = $base . $i; $i++; }
-            $user_id = wp_insert_user(array('user_login' => $username, 'user_pass' => wp_generate_password(40, true, true), 'user_email' => $email, 'display_name' => sanitize_text_field($claims['name'] ?? $email), 'role' => 'customer'));
+            $user_id = wp_insert_user(array('user_login' => $username, 'user_pass' => wp_generate_password(40, true, true), 'user_email' => $email, 'display_name' => sanitize_text_field($claims['name'] ?? $email), 'role' => $this->customer_role()));
             if (is_wp_error($user_id)) wp_die('Could not create your customer account.');
             $user = get_user_by('id', $user_id);
         }
