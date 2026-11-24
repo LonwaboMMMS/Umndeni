@@ -460,3 +460,14 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
 .password-toggle { position: absolute; top: 50%; right: 8px; display: grid; place-items: center; width: 32px; height: 32px; padding: 6px; transform: translateY(-50%); border: 0; border-radius: 6px; background: transparent; color: #758591; }
 .password-toggle:hover, .password-toggle:focus-visible { background: #F0F6F7; color: var(--navy); outline: none; }
 .password-toggle svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+
+/* Bob Go delivery choices */
+.delivery-rate-option{display:flex;align-items:center;gap:12px;padding:14px 16px;margin-top:10px;border:1px solid var(--border,#e5e7eb);border-radius:12px;cursor:pointer;background:#fff}
+.delivery-rate-option:has(input:checked){border-color:#0e4366;background:#f3f8fb}
+.delivery-rate-option input{accent-color:#0e4366;flex:0 0 auto}
+.delivery-rate-details{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.delivery-rate-details small{color:#667085;font-size:12px}
+.delivery-rate-price{white-space:nowrap}
+.shipping-quote-section .form-feedback{margin:10px 0 0}
+#payNowButton:disabled{opacity:.55;cursor:not-allowed}
