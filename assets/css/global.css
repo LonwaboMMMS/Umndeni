@@ -120,8 +120,8 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
 .pill { display: inline-flex; align-items: center; padding: 5px 9px; border-radius: 30px; font-size: 9px; font-weight: 700; white-space: nowrap; }
 .pill-green { background: #EDF7EE; color: var(--green); }
 .featured-product-row { display: flex; align-items: center; gap: 18px; margin-top: 17px; }
-.mini-product-art { display: flex; flex: 0 0 140px; align-items: center; flex-direction: column; justify-content: center; height: 135px; border-radius: 9px; background: #F0F6F7; color: var(--navy); }
-.mini-product-art img { display: block; width: 100%; height: 100%; padding: 8px; border-radius: 9px; object-fit: contain; }
+.mini-product-art { display: flex; flex: 0 0 140px; align-items: center; flex-direction: column; justify-content: center; height: 135px; overflow: hidden; border-radius: 9px; background: transparent; color: var(--navy); }
+.mini-product-art img { display: block; width: 100%; height: 100%; padding: 0; border-radius: 9px; object-fit: cover; }
 .mini-product-art span { font: 800 33px Manrope,sans-serif; }
 .mini-product-art small { color: #91A2AA; font-size: 7px; letter-spacing: 1px; }
 .featured-info p { margin: 0 0 9px; color: var(--muted); font-size: 10px; line-height: 1.5; }
