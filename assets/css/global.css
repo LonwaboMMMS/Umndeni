@@ -471,3 +471,20 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
 .delivery-rate-price{white-space:nowrap}
 .shipping-quote-section .form-feedback{margin:10px 0 0}
 #payNowButton:disabled{opacity:.55;cursor:not-allowed}
+
+/* Customer account delivery, tracking and security sections */
+#accountArea .account-extra { margin-top: 18px; }
+#accountArea .account-extra h3 { margin: 5px 0 8px; color: var(--navy); }
+#accountArea .saved-address-card, #accountArea .account-order-card { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 15px 0; border-bottom: 1px solid var(--line); }
+#accountArea .saved-address-card p, #accountArea .account-order-card p { margin: 6px 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+#accountArea .account-order-card { display: block; }
+#accountArea .account-order-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#accountArea .address-default { display: flex; align-items: center; gap: 9px; margin: 14px 0; color: var(--muted); font-size: 13px; }
+#accountArea .address-default input { width: auto; }
+#accountArea .account-extra form { margin-top: 18px; }
+#accountArea .account-extra .form-feedback { margin-top: 10px; }
+.saved-address-select { margin-bottom: 18px; }
+@media(max-width:600px) {
+  #accountArea .saved-address-card { flex-direction: column; gap: 8px; }
+  #accountArea .account-order-head { align-items: flex-start; flex-direction: column; }
+}
