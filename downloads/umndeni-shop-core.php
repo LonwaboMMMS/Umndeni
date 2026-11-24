@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Umndeni Shop Core
  * Description: WordPress customer accounts, Google sign-in, customer profiles and persistent shop orders for the Umndeni static shop.
- * Version: 1.1.1
+ * Version: 1.2.0
  * Author: Reverb Daily Media
  * Requires at least: 6.2
  * Requires PHP: 7.4
@@ -11,7 +11,7 @@
 if (!defined('ABSPATH')) exit;
 
 final class Umndeni_Shop_Core {
-    const VERSION = '1.1.1';
+    const VERSION = '1.2.0';
     const REST_NS = 'umndeni/v1';
     const OPTION = 'umndn_shop_settings';
 
