@@ -385,9 +385,10 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
   .stat-card > small { font-size: 8px; }
   .home-bottom-grid { gap: 11px; margin-top: 12px; }
   .featured-card, .recent-card { padding: 16px; }
-  .featured-product-row { gap: 12px; }
-  .mini-product-art { flex-basis: 110px; height: 115px; }
-  .featured-info p { font-size: 9px; }
+  .featured-product-row { flex-direction: column; align-items: stretch; gap: 16px; }
+  .mini-product-art { flex: 0 0 auto; width: 100%; height: 270px; }
+  .mini-product-art img { padding: 4px; }
+  .featured-info p { font-size: 10px; }
   .catalog-tag { display: none; }
   .shop-layout { gap: 12px; }
   .product-detail-card { grid-template-columns: 1fr; }
