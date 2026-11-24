@@ -11,6 +11,15 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/global.css?v=featured-photo-mobile2">
   <script src="assets/js/app.js?v=browse-buttons2" defer></script>
+  <style>
+    @media (max-width: 680px) {
+      .home-bottom-grid { grid-template-columns: 1fr !important; }
+      .featured-card { width: 100% !important; min-width: 0 !important; }
+      .featured-product-row { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 18px !important; }
+      .featured-card .mini-product-art { display: flex !important; flex: 0 0 360px !important; width: 100% !important; height: 360px !important; min-height: 360px !important; }
+      .featured-card .mini-product-art img { display: block !important; width: 100% !important; height: 100% !important; max-width: none !important; padding: 0 !important; object-fit: contain !important; }
+    }
+  </style>
 </head>
 <body data-page="home">
   <div class="app-shell">
