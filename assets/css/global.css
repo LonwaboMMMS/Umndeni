@@ -488,3 +488,16 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
   #accountArea .saved-address-card { flex-direction: column; gap: 8px; }
   #accountArea .account-order-head { align-items: flex-start; flex-direction: column; }
 }
+
+/* My Account tabs */
+#accountArea .account-tools { margin-top: 22px; }
+#accountArea .account-tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 12px; background: #f7f9fa; }
+#accountArea .account-tab { appearance: none; border: 0; border-radius: 8px; padding: 11px 16px; background: transparent; color: var(--muted); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+#accountArea .account-tab.active { background: #fff; color: var(--navy); box-shadow: 0 1px 5px rgba(0,0,0,.08); }
+#accountArea [data-account-panel][hidden] { display: none !important; }
+#accountArea [data-account-panel] { margin-top: 0; padding: 24px; }
+@media(max-width:600px) {
+ #accountArea .account-tabs { display: grid; grid-template-columns: 1fr; }
+ #accountArea .account-tab { text-align: left; }
+ #accountArea [data-account-panel] { padding: 18px; }
+}
