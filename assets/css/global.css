@@ -28,6 +28,7 @@ a { color: inherit; text-decoration: none; }
 .app-shell { min-height: 100vh; }
 .sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; display: flex; flex-direction: column; width: 252px; padding: 29px 19px 20px; background: #fff; border-right: 1px solid var(--line); }
 .brand { display: flex; align-items: center; gap: 11px; padding: 0 9px; color: var(--navy); }
+.brand-logo { display: block; width: 158px; max-width: 100%; height: auto; object-fit: contain; object-position: left center; }
 .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: var(--navy); color: #fff; font: 800 25px Manrope,sans-serif; }
 .brand-copy { display: flex; flex-direction: column; line-height: 1; }
 .brand-copy strong { font: 800 23px Manrope,sans-serif; letter-spacing: -1.3px; }
@@ -92,6 +93,7 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
 .hero-orbit { position: absolute; border: 1px solid rgba(255,255,255,.13); border-radius: 50%; }
 .orbit-one { width: 280px; height: 280px; }
 .orbit-two { width: 210px; height: 210px; }
+.hero-product-image { position: relative; z-index: 2; display: block; width: min(42%, 230px); max-height: 225px; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.2)); transform: rotate(3deg); }
 .hero-product-placeholder { position: relative; z-index: 2; display: flex; align-items: center; flex-direction: column; justify-content: center; width: 150px; height: 174px; border: 1px dashed rgba(255,255,255,.45); border-radius: 12px; background: rgba(255,255,255,.08); text-align: center; backdrop-filter: blur(5px); transform: rotate(4deg); }
 .placeholder-cross { color: #A7D8C0; font-size: 29px; line-height: 1; }
 .hero-product-placeholder strong { margin-top: 8px; font: 800 15px Manrope,sans-serif; letter-spacing: 1px; }
@@ -119,6 +121,7 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
 .pill-green { background: #EDF7EE; color: var(--green); }
 .featured-product-row { display: flex; align-items: center; gap: 18px; margin-top: 17px; }
 .mini-product-art { display: flex; flex: 0 0 116px; align-items: center; flex-direction: column; justify-content: center; height: 115px; border-radius: 9px; background: #F0F6F7; color: var(--navy); }
+.mini-product-art img { display: block; width: 100%; height: 100%; padding: 8px; border-radius: 9px; object-fit: contain; }
 .mini-product-art span { font: 800 33px Manrope,sans-serif; }
 .mini-product-art small { color: #91A2AA; font-size: 7px; letter-spacing: 1px; }
 .featured-info p { margin: 0 0 9px; color: var(--muted); font-size: 10px; line-height: 1.5; }
@@ -139,6 +142,7 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
 .visual-tag, .visual-bottom { position: absolute; z-index: 2; color: #7E9AA5; font-size: 8px; font-weight: 700; letter-spacing: 1.6px; }
 .visual-tag { top: 22px; left: 22px; }
 .visual-bottom { bottom: 20px; }
+.shop-product-image { position: relative; z-index: 2; display: block; width: 72%; max-height: 370px; object-fit: contain; filter: drop-shadow(0 15px 20px rgba(14,67,102,.13)); }
 .product-image-placeholder { position: relative; z-index: 2; display: flex; align-items: center; flex-direction: column; justify-content: center; width: 68%; min-height: 210px; border: 1px dashed #A8C2CA; border-radius: 12px; background: rgba(255,255,255,.58); color: var(--navy); text-align: center; }
 .product-image-placeholder .placeholder-cross { color: var(--green); font-size: 35px; }
 .product-image-placeholder strong { margin-top: 13px; font: 800 17px Manrope,sans-serif; letter-spacing: 1px; line-height: 1.2; }
