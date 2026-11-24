@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Umndeni Shop Core
  * Description: WordPress customer accounts, Google sign-in, customer profiles and persistent shop orders for the Umndeni static shop.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: Reverb Daily Media
  * Requires at least: 6.2
  * Requires PHP: 7.4
@@ -11,7 +11,7 @@
 if (!defined('ABSPATH')) exit;
 
 final class Umndeni_Shop_Core {
-    const VERSION = '1.2.0';
+    const VERSION = '1.3.0';
     const REST_NS = 'umndeni/v1';
     const OPTION = 'umndn_shop_settings';
 
@@ -31,6 +31,7 @@ final class Umndeni_Shop_Core {
         add_action('init', array($this, 'google_oauth_routes'));
         add_action('rest_api_init', array($this, 'register_payfast_routes'));
         add_action('rest_api_init', array($this, 'register_bobgo_routes'));
+        add_action('init', array($this, 'maybe_upgrade_schema'), 5);
     }
 
     private function tables() {
@@ -39,6 +40,7 @@ final class Umndeni_Shop_Core {
             'customers' => $wpdb->prefix . 'umndn_customers',
             'orders' => $wpdb->prefix . 'umndn_orders',
             'items' => $wpdb->prefix . 'umndn_order_items',
+            'addresses' => $wpdb->prefix . 'umndn_addresses',
         );
     }
 
@@ -69,6 +71,8 @@ final class Umndeni_Shop_Core {
             business varchar(190) NOT NULL DEFAULT '',
             delivery_address text NULL,
             delivery_method varchar(80) NOT NULL DEFAULT '',
+            tracking_number varchar(100) NOT NULL DEFAULT '',
+            tracking_url text NULL,
             subtotal decimal(12,2) NOT NULL DEFAULT 0.00,
             delivery_fee decimal(12,2) NOT NULL DEFAULT 0.00,
             total decimal(12,2) NOT NULL DEFAULT 0.00,
@@ -85,6 +89,24 @@ final class Umndeni_Shop_Core {
             KEY status (status)
         ) $collate;");
 
+        dbDelta("CREATE TABLE {$t['addresses']} (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) unsigned NOT NULL,
+            label varchar(100) NOT NULL DEFAULT '',
+            recipient varchar(190) NOT NULL DEFAULT '',
+            phone varchar(40) NOT NULL DEFAULT '',
+            street_address varchar(255) NOT NULL,
+            area varchar(190) NOT NULL DEFAULT '',
+            city varchar(190) NOT NULL,
+            province varchar(100) NOT NULL,
+            postal_code varchar(20) NOT NULL,
+            is_default tinyint(1) NOT NULL DEFAULT 0,
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id)
+        ) $collate;");
+
         dbDelta("CREATE TABLE {$t['items']} (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             order_id bigint(20) unsigned NOT NULL,
@@ -98,9 +120,15 @@ final class Umndeni_Shop_Core {
             KEY order_id (order_id)
         ) $collate;");
 
+        update_option('umndn_schema_version', self::VERSION);
+
         if (!get_option(self::OPTION)) {
             add_option(self::OPTION, array('google_client_id' => '', 'google_client_secret' => '', 'payfast_merchant_id' => '', 'payfast_merchant_key' => '', 'payfast_passphrase' => '', 'payfast_sandbox' => 1, 'bobgo_api_key' => '', 'bobgo_sandbox' => 1));
         }
+    }
+
+    public function maybe_upgrade_schema() {
+        if (get_option('umndn_schema_version') !== self::VERSION) self::activate();
     }
 
     public function register_routes() {
@@ -127,6 +155,16 @@ final class Umndeni_Shop_Core {
         register_rest_route(self::REST_NS, '/account', array(
             'methods' => 'POST', 'callback' => array($this, 'save_account'),
             'permission_callback' => array($this, 'valid_logged_in_request')
+        ));
+        register_rest_route(self::REST_NS, '/addresses', array(
+            array('methods' => 'GET', 'callback' => array($this, 'customer_addresses'), 'permission_callback' => 'is_user_logged_in'),
+            array('methods' => 'POST', 'callback' => array($this, 'save_address'), 'permission_callback' => array($this, 'valid_logged_in_request'))
+        ));
+        register_rest_route(self::REST_NS, '/addresses/(?P<id>\\d+)', array(
+            'methods' => 'DELETE', 'callback' => array($this, 'delete_address'), 'permission_callback' => array($this, 'valid_logged_in_request')
+        ));
+        register_rest_route(self::REST_NS, '/password', array(
+            'methods' => 'POST', 'callback' => array($this, 'change_password'), 'permission_callback' => array($this, 'valid_logged_in_request')
         ));
         register_rest_route(self::REST_NS, '/orders', array(
             array('methods' => 'GET', 'callback' => array($this, 'customer_orders'), 'permission_callback' => 'is_user_logged_in'),
@@ -275,6 +313,72 @@ final class Umndeni_Shop_Core {
         if (is_wp_error($updated)) return $updated;
         $this->save_customer_row($user_id, $this->input_text($request, 'phone', 40), $this->input_text($request, 'business'));
         return rest_ensure_response(array('success' => true, 'customer' => $this->customer_data($user_id)));
+    }
+
+    public function customer_addresses() {
+        global $wpdb;
+        $t = $this->tables();
+        $rows = $wpdb->get_results($wpdb->prepare("SELECT id,label,recipient,phone,street_address,area,city,province,postal_code,is_default FROM {$t['addresses']} WHERE user_id = %d ORDER BY is_default DESC, id DESC", get_current_user_id()), ARRAY_A);
+        return rest_ensure_response($rows);
+    }
+
+    public function save_address($request) {
+        global $wpdb;
+        $t = $this->tables();
+        $user_id = get_current_user_id();
+        $data = array(
+            'label' => $this->input_text($request, 'label', 100),
+            'recipient' => $this->input_text($request, 'recipient'),
+            'phone' => $this->input_text($request, 'phone', 40),
+            'street_address' => $this->input_text($request, 'street_address', 255),
+            'area' => $this->input_text($request, 'area'),
+            'city' => $this->input_text($request, 'city'),
+            'province' => $this->input_text($request, 'province', 100),
+            'postal_code' => $this->input_text($request, 'postal_code', 20),
+            'updated_at' => current_time('mysql')
+        );
+        if (!$data['street_address'] || !$data['city'] || !$data['province'] || !$data['postal_code']) {
+            return new WP_Error('address_required', 'Enter a street address, city, province and postal code.', array('status' => 400));
+        }
+        $id = absint($request->get_param('id'));
+        $is_default = (bool) $request->get_param('is_default');
+        if ($is_default || !$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$t['addresses']} WHERE user_id = %d", $user_id))) {
+            $wpdb->update($t['addresses'], array('is_default' => 0), array('user_id' => $user_id));
+            $is_default = true;
+        }
+        $data['is_default'] = $is_default ? 1 : 0;
+        if ($id) {
+            $updated = $wpdb->update($t['addresses'], $data, array('id' => $id, 'user_id' => $user_id));
+            if ($updated === false || $wpdb->get_var($wpdb->prepare("SELECT id FROM {$t['addresses']} WHERE id = %d AND user_id = %d", $id, $user_id)) === null) {
+                return new WP_Error('address_not_found', 'That saved address could not be found.', array('status' => 404));
+            }
+        } else {
+            $data['user_id'] = $user_id;
+            $data['created_at'] = current_time('mysql');
+            if (!$wpdb->insert($t['addresses'], $data)) return new WP_Error('address_save_failed', 'The address could not be saved.', array('status' => 500));
+        }
+        return rest_ensure_response(array('success' => true, 'addresses' => $this->customer_addresses()->get_data()));
+    }
+
+    public function delete_address($request) {
+        global $wpdb;
+        $t = $this->tables();
+        $id = absint($request['id']);
+        $deleted = $wpdb->delete($t['addresses'], array('id' => $id, 'user_id' => get_current_user_id()));
+        if (!$deleted) return new WP_Error('address_not_found', 'That saved address could not be found.', array('status' => 404));
+        return rest_ensure_response(array('success' => true));
+    }
+
+    public function change_password($request) {
+        $user = wp_get_current_user();
+        $current = (string) $request->get_param('current_password');
+        $new = (string) $request->get_param('new_password');
+        $confirm = (string) $request->get_param('confirm_password');
+        if (!$current || !wp_check_password($current, $user->user_pass, $user->ID)) return new WP_Error('wrong_password', 'Your current password is incorrect.', array('status' => 403));
+        if (strlen($new) < 8) return new WP_Error('weak_password', 'Your new password must be at least 8 characters.', array('status' => 400));
+        if ($new !== $confirm) return new WP_Error('password_mismatch', 'The new passwords do not match.', array('status' => 400));
+        wp_set_password($new, $user->ID);
+        return rest_ensure_response(array('success' => true, 'message' => 'Your password has been changed. Please log in again.'));
     }
 
     private function catalog() {
@@ -475,6 +579,7 @@ final class Umndeni_Shop_Core {
             'name' => $order->customer_name, 'email' => $order->customer_email,
             'phone' => $order->customer_phone, 'business' => $order->business,
             'delivery_address' => $order->delivery_address, 'delivery_method' => $order->delivery_method,
+            'tracking_number' => $order->tracking_number ?? '', 'tracking_url' => $order->tracking_url ?? '',
             'subtotal' => (float) $order->subtotal, 'delivery_fee' => (float) $order->delivery_fee,
             'total' => (float) $order->total, 'status' => $order->status,
             'payment_status' => $order->payment_status, 'created_at' => $order->created_at, 'items' => $items
@@ -509,7 +614,14 @@ final class Umndeni_Shop_Core {
             return new WP_Error('invalid_status', 'Invalid order or payment status.', array('status' => 400));
         }
         $t = $this->tables();
-        $wpdb->update($t['orders'], array('status' => $status, 'payment_status' => $payment, 'updated_at' => current_time('mysql')), array('id' => absint($request['id'])));
+        $updates = array('status' => $status, 'payment_status' => $payment, 'updated_at' => current_time('mysql'));
+        if ($request->get_param('tracking_number') !== null) $updates['tracking_number'] = sanitize_text_field((string) $request->get_param('tracking_number'));
+        if ($request->get_param('tracking_url') !== null) {
+            $url = esc_url_raw((string) $request->get_param('tracking_url'));
+            if ($url && !wp_http_validate_url($url)) return new WP_Error('invalid_tracking_url', 'Enter a valid tracking URL.', array('status' => 400));
+            $updates['tracking_url'] = $url;
+        }
+        $wpdb->update($t['orders'], $updates, array('id' => absint($request['id'])));
         return rest_ensure_response(array('success' => true));
     }
 
