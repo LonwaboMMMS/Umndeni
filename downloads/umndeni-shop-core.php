@@ -201,12 +201,12 @@ final class Umndeni_Shop_Core {
     }
 
     public function login_customer($request) {
-        $email = sanitize_email((string) $request->get_param('email'));
+        $identifier = sanitize_text_field((string) ($request->get_param('identifier') ?: $request->get_param('email')));
         $password = (string) $request->get_param('password');
-        $user = get_user_by('email', $email);
-        if (!$user) return new WP_Error('login_failed', 'Email or password is incorrect.', array('status' => 401));
+        $user = is_email($identifier) ? get_user_by('email', sanitize_email($identifier)) : get_user_by('login', $identifier);
+        if (!$user) return new WP_Error('login_failed', 'Username/email or password is incorrect.', array('status' => 401));
         $signed = wp_signon(array('user_login' => $user->user_login, 'user_password' => $password, 'remember' => true), is_ssl());
-        if (is_wp_error($signed)) return new WP_Error('login_failed', 'Email or password is incorrect.', array('status' => 401));
+        if (is_wp_error($signed)) return new WP_Error('login_failed', 'Username/email or password is incorrect.', array('status' => 401));
         wp_set_current_user($signed->ID);
         wp_set_auth_cookie($signed->ID, true, is_ssl());
         return rest_ensure_response(array('success' => true, 'nonce' => wp_create_nonce('wp_rest'), 'customer' => $this->customer_data($signed->ID)));
