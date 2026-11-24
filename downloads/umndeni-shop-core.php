@@ -30,6 +30,7 @@ final class Umndeni_Shop_Core {
         add_action('admin_init', array($this, 'register_settings'));
         add_action('init', array($this, 'google_oauth_routes'));
         add_action('rest_api_init', array($this, 'register_payfast_routes'));
+        add_action('rest_api_init', array($this, 'register_bobgo_routes'));
     }
 
     private function tables() {
@@ -98,7 +99,7 @@ final class Umndeni_Shop_Core {
         ) $collate;");
 
         if (!get_option(self::OPTION)) {
-            add_option(self::OPTION, array('google_client_id' => '', 'google_client_secret' => '', 'payfast_merchant_id' => '', 'payfast_merchant_key' => '', 'payfast_passphrase' => '', 'payfast_sandbox' => 1));
+            add_option(self::OPTION, array('google_client_id' => '', 'google_client_secret' => '', 'payfast_merchant_id' => '', 'payfast_merchant_key' => '', 'payfast_passphrase' => '', 'payfast_sandbox' => 1, 'bobgo_api_key' => '', 'bobgo_sandbox' => 1));
         }
     }
 
@@ -283,6 +284,130 @@ final class Umndeni_Shop_Core {
         );
     }
 
+    public function register_bobgo_routes() {
+        register_rest_route(self::REST_NS, '/shipping/quote', array(
+            'methods' => 'POST', 'callback' => array($this, 'bobgo_quote'),
+            'permission_callback' => '__return_true'
+        ));
+    }
+
+    private function bobgo_address_settings($settings) {
+        return array(
+            'type' => 'business',
+            'company' => sanitize_text_field($settings['bobgo_collection_company'] ?? ''),
+            'street_address' => sanitize_text_field($settings['bobgo_collection_street'] ?? ''),
+            'local_area' => sanitize_text_field($settings['bobgo_collection_area'] ?? ''),
+            'city' => sanitize_text_field($settings['bobgo_collection_city'] ?? ''),
+            'zone' => sanitize_text_field($settings['bobgo_collection_zone'] ?? ''),
+            'country' => 'ZA',
+            'code' => sanitize_text_field($settings['bobgo_collection_code'] ?? '')
+        );
+    }
+
+    public function bobgo_quote($request) {
+        $settings = get_option(self::OPTION, array());
+        $api_key = trim((string) ($settings['bobgo_api_key'] ?? ''));
+        $collection = $this->bobgo_address_settings($settings);
+        if (!$api_key || empty($collection['street_address']) || empty($collection['city']) || empty($collection['zone']) || empty($collection['code'])) {
+            return new WP_Error('bobgo_not_configured', 'Delivery quotations are not configured yet. Please contact the shop.', array('status' => 503));
+        }
+
+        $items = $request->get_param('items');
+        if (!is_array($items) || empty($items) || count($items) > 30) {
+            return new WP_Error('invalid_items', 'Your cart does not contain valid items.', array('status' => 400));
+        }
+        $catalog = $this->catalog();
+        $bobgo_items = array();
+        $clean_items = array();
+        $subtotal = 0.0;
+        foreach ($items as $item) {
+            $pid = isset($item['product_id']) ? sanitize_key($item['product_id']) : '';
+            $qty = isset($item['quantity']) ? absint($item['quantity']) : 0;
+            if (!isset($catalog[$pid]) || $qty < 1 || $qty > 100) {
+                return new WP_Error('invalid_item', 'One or more order items are invalid.', array('status' => 400));
+            }
+            $p = $catalog[$pid];
+            $prefix = $pid === 'umndeni-petroleum-jelly-100g' ? 'bobgo_100g_' : 'bobgo_250g_';
+            $length = (float) ($settings[$prefix . 'length'] ?? 0);
+            $width = (float) ($settings[$prefix . 'width'] ?? 0);
+            $height = (float) ($settings[$prefix . 'height'] ?? 0);
+            $weight = (float) ($settings[$prefix . 'weight'] ?? 0);
+            if ($length <= 0 || $width <= 0 || $height <= 0 || $weight <= 0) {
+                return new WP_Error('bobgo_parcels_missing', 'Parcel measurements have not been configured yet. Please contact the shop.', array('status' => 503));
+            }
+            $line = $p['price'] * $qty;
+            $subtotal += $line;
+            $clean_items[] = array('product_id' => $pid, 'quantity' => $qty);
+            $bobgo_items[] = array(
+                'description' => $p['name'] . ' — ' . $p['variant'],
+                'sku' => $pid,
+                'price' => $p['price'],
+                'quantity' => $qty,
+                'length_cm' => $length,
+                'width_cm' => $width,
+                'height_cm' => $height,
+                'weight_kg' => $weight
+            );
+        }
+
+        $delivery = $request->get_param('delivery_address');
+        if (!is_array($delivery)) return new WP_Error('delivery_required', 'Please enter your delivery address.', array('status' => 400));
+        $address = array(
+            'type' => 'residential',
+            'street_address' => sanitize_text_field($delivery['street_address'] ?? ''),
+            'local_area' => sanitize_text_field($delivery['local_area'] ?? ''),
+            'city' => sanitize_text_field($delivery['city'] ?? ''),
+            'zone' => sanitize_text_field($delivery['zone'] ?? ''),
+            'country' => 'ZA',
+            'code' => sanitize_text_field($delivery['code'] ?? '')
+        );
+        if (!$address['street_address'] || !$address['city'] || !$address['zone'] || !$address['code']) {
+            return new WP_Error('delivery_required', 'Please complete your street address, city, province and postal code.', array('status' => 400));
+        }
+
+        $base = !empty($settings['bobgo_sandbox']) ? 'https://api.sandbox.bobgo.co.za/v2' : 'https://api.bobgo.co.za/v2';
+        $response = wp_remote_post($base . '/rates-at-checkout', array(
+            'timeout' => 25,
+            'headers' => array('Authorization' => 'Bearer ' . $api_key, 'Content-Type' => 'application/json', 'Accept' => 'application/json'),
+            'body' => wp_json_encode(array(
+                'collection_address' => $collection,
+                'delivery_address' => $address,
+                'items' => $bobgo_items,
+                'order_total_price' => $subtotal
+            ))
+        ));
+        if (is_wp_error($response)) return new WP_Error('bobgo_unavailable', 'We could not reach the delivery service. Please try again.', array('status' => 502));
+        $status = wp_remote_retrieve_response_code($response);
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        if ($status < 200 || $status >= 300) {
+            return new WP_Error('bobgo_quote_failed', 'A delivery quote could not be obtained. Please check your address or try again.', array('status' => 502));
+        }
+        $rates = isset($body['rates']) && is_array($body['rates']) ? $body['rates'] : array();
+        if (!$rates) return rest_ensure_response(array('success' => true, 'rates' => array(), 'message' => 'No delivery services are available for this address.'));
+        $token = wp_generate_password(48, false, false);
+        $safe_rates = array();
+        foreach ($rates as $rate) {
+            if (!isset($rate['id'], $rate['service_name'], $rate['service_code'], $rate['total_price'])) continue;
+            $price = (float) $rate['total_price'];
+            if ($price < 0 || $price > 5000) continue;
+            $safe_rates[] = array(
+                'id' => (string) $rate['id'],
+                'service_name' => sanitize_text_field($rate['service_name']),
+                'service_code' => sanitize_text_field($rate['service_code']),
+                'total_price' => $price,
+                'min_delivery_date' => sanitize_text_field($rate['min_delivery_date'] ?? ''),
+                'max_delivery_date' => sanitize_text_field($rate['max_delivery_date'] ?? ''),
+                'type' => sanitize_key($rate['type'] ?? 'door')
+            );
+        }
+        if (!$safe_rates) return rest_ensure_response(array('success' => true, 'rates' => array(), 'message' => 'No delivery services are available for this address.'));
+        set_transient('umndn_bobgo_quote_' . hash('sha256', $token), array(
+            'rates' => $safe_rates, 'items' => $clean_items, 'address' => $address,
+            'subtotal' => $subtotal
+        ), 20 * MINUTE_IN_SECONDS);
+        return rest_ensure_response(array('success' => true, 'quote_token' => $token, 'rates' => $safe_rates));
+    }
+
     public function create_order($request) {
         global $wpdb;
         $items = $request->get_param('items');
@@ -300,8 +425,28 @@ final class Umndeni_Shop_Core {
             $p = $catalog[$pid]; $line = $p['price'] * $qty; $subtotal += $line;
             $clean_items[] = array('product_id' => $pid, 'product_name' => $p['name'], 'variant' => $p['variant'], 'quantity' => $qty, 'unit_price' => $p['price'], 'line_total' => $line);
         }
-        $delivery_fee = max(0, (float) $request->get_param('delivery_fee'));
-        if ($delivery_fee > 5000) return new WP_Error('invalid_delivery', 'Delivery fee is invalid.', array('status' => 400));
+        $quote_token = sanitize_text_field((string) $request->get_param('quote_token'));
+        $quote = $quote_token ? get_transient('umndn_bobgo_quote_' . hash('sha256', $quote_token)) : false;
+        if (!$quote || !isset($quote['rates'], $quote['items'], $quote['subtotal'])) {
+            return new WP_Error('delivery_quote_expired', 'Your delivery quote has expired. Please get a new quote.', array('status' => 400));
+        }
+        $selected_rate_id = sanitize_text_field((string) $request->get_param('rate_id'));
+        $selected_rate = null;
+        foreach ($quote['rates'] as $rate) if ((string) $rate['id'] === $selected_rate_id) { $selected_rate = $rate; break; }
+        if (!$selected_rate || count($clean_items) !== count($quote['items'])) {
+            return new WP_Error('invalid_delivery_quote', 'Please select a valid delivery option and request a fresh quote.', array('status' => 400));
+        }
+        foreach ($clean_items as $index => $item) {
+            if ($item['product_id'] !== $quote['items'][$index]['product_id'] || (int) $item['quantity'] !== (int) $quote['items'][$index]['quantity']) {
+                return new WP_Error('quote_cart_mismatch', 'Your cart changed after the delivery quote. Please request a new quote.', array('status' => 409));
+            }
+        }
+        if (abs($subtotal - (float) $quote['subtotal']) > 0.01) {
+            return new WP_Error('quote_total_mismatch', 'Your order total changed. Please request a new delivery quote.', array('status' => 409));
+        }
+        $delivery_fee = (float) $selected_rate['total_price'];
+        $delivery_address = $quote['address']['street_address'] . ', ' . $quote['address']['local_area'] . ', ' . $quote['address']['city'] . ', ' . $quote['address']['zone'] . ', ' . $quote['address']['code'] . ', South Africa';
+        $delivery_method = $selected_rate['service_name'] . ' (' . $selected_rate['service_code'] . ')';
         $user_id = is_user_logged_in() ? get_current_user_id() : null;
         $access_token = wp_generate_password(48, false, false);
         $t = $this->tables(); $now = current_time('mysql');
@@ -309,14 +454,15 @@ final class Umndeni_Shop_Core {
         $wpdb->insert($t['orders'], array(
             'order_number' => $number, 'user_id' => $user_id, 'customer_name' => $name, 'customer_email' => $email,
             'customer_phone' => $this->input_text($request, 'phone', 40), 'business' => $this->input_text($request, 'business'),
-            'delivery_address' => sanitize_textarea_field((string) $request->get_param('delivery_address')),
-            'delivery_method' => $this->input_text($request, 'delivery_method', 80),
+            'delivery_address' => $delivery_address,
+            'delivery_method' => $delivery_method,
             'subtotal' => $subtotal, 'delivery_fee' => $delivery_fee, 'total' => $subtotal + $delivery_fee,
             'status' => 'pending', 'payment_status' => 'pending', 'access_token_hash' => hash('sha256', $access_token), 'created_at' => $now, 'updated_at' => $now
         ));
         $order_id = (int) $wpdb->insert_id;
         if (!$order_id) return new WP_Error('order_failed', 'The order could not be saved. Please try again.', array('status' => 500));
         foreach ($clean_items as $item) $wpdb->insert($t['items'], $item + array('order_id' => $order_id));
+        delete_transient('umndn_bobgo_quote_' . hash('sha256', $quote_token));
         return new WP_REST_Response(array('success' => true, 'order_id' => $order_id, 'order_number' => $number, 'total' => $subtotal + $delivery_fee, 'payment_status' => 'pending', 'payment_token' => $access_token), 201);
     }
 
@@ -496,7 +642,23 @@ final class Umndeni_Shop_Core {
             'payfast_merchant_id' => isset($input['payfast_merchant_id']) ? sanitize_text_field($input['payfast_merchant_id']) : '',
             'payfast_merchant_key' => !empty($input['payfast_merchant_key']) ? sanitize_text_field($input['payfast_merchant_key']) : (get_option(self::OPTION, array())['payfast_merchant_key'] ?? ''),
             'payfast_passphrase' => !empty($input['payfast_passphrase']) ? sanitize_text_field($input['payfast_passphrase']) : (get_option(self::OPTION, array())['payfast_passphrase'] ?? ''),
-            'payfast_sandbox' => !empty($input['payfast_sandbox']) ? 1 : 0
+            'payfast_sandbox' => !empty($input['payfast_sandbox']) ? 1 : 0,
+            'bobgo_api_key' => !empty($input['bobgo_api_key']) ? sanitize_text_field($input['bobgo_api_key']) : (get_option(self::OPTION, array())['bobgo_api_key'] ?? ''),
+            'bobgo_sandbox' => !empty($input['bobgo_sandbox']) ? 1 : 0,
+            'bobgo_collection_company' => sanitize_text_field($input['bobgo_collection_company'] ?? ''),
+            'bobgo_collection_street' => sanitize_text_field($input['bobgo_collection_street'] ?? ''),
+            'bobgo_collection_area' => sanitize_text_field($input['bobgo_collection_area'] ?? ''),
+            'bobgo_collection_city' => sanitize_text_field($input['bobgo_collection_city'] ?? ''),
+            'bobgo_collection_zone' => sanitize_text_field($input['bobgo_collection_zone'] ?? ''),
+            'bobgo_collection_code' => sanitize_text_field($input['bobgo_collection_code'] ?? ''),
+            'bobgo_100g_length' => max(0, (float) ($input['bobgo_100g_length'] ?? 0)),
+            'bobgo_100g_width' => max(0, (float) ($input['bobgo_100g_width'] ?? 0)),
+            'bobgo_100g_height' => max(0, (float) ($input['bobgo_100g_height'] ?? 0)),
+            'bobgo_100g_weight' => max(0, (float) ($input['bobgo_100g_weight'] ?? 0)),
+            'bobgo_250g_length' => max(0, (float) ($input['bobgo_250g_length'] ?? 0)),
+            'bobgo_250g_width' => max(0, (float) ($input['bobgo_250g_width'] ?? 0)),
+            'bobgo_250g_height' => max(0, (float) ($input['bobgo_250g_height'] ?? 0)),
+            'bobgo_250g_weight' => max(0, (float) ($input['bobgo_250g_weight'] ?? 0))
         );
     }
 
@@ -517,6 +679,18 @@ final class Umndeni_Shop_Core {
         echo '<tr><th>Merchant Key</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[payfast_merchant_key]" value="" placeholder="Leave blank to keep saved key"></td></tr>';
         echo '<tr><th>Passphrase</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[payfast_passphrase]" value="" placeholder="Leave blank to keep saved passphrase"></td></tr>';
         echo '<tr><th>Environment</th><td><label><input type="checkbox" name="' . esc_attr(self::OPTION) . '[payfast_sandbox]" value="1" ' . checked(!empty($settings['payfast_sandbox']), true, false) . '> Enable sandbox/test mode</label></td></tr></table>';
+        echo '<h2>Bob Go Delivery</h2><p>These settings are completed after your Bob Go account is created. API keys are stored in WordPress and are never sent to the shop browser.</p><table class="form-table">';
+        echo '<tr><th>API Key</th><td><input type="password" autocomplete="new-password" class="regular-text" name="' . esc_attr(self::OPTION) . '[bobgo_api_key]" value="" placeholder="Leave blank to keep saved API key"></td></tr>';
+        echo '<tr><th>Environment</th><td><label><input type="checkbox" name="' . esc_attr(self::OPTION) . '[bobgo_sandbox]" value="1" ' . checked(!empty($settings['bobgo_sandbox']), true, false) . '> Use Bob Go sandbox</label></td></tr>';
+        echo '<tr><th>Collection company</th><td><input class="regular-text" name="' . esc_attr(self::OPTION) . '[bobgo_collection_company]" value="' . esc_attr($settings['bobgo_collection_company'] ?? '') . '"></td></tr>';
+        foreach (array('street' => 'Collection street address', 'area' => 'Collection suburb / area', 'city' => 'Collection city', 'zone' => 'Collection province', 'code' => 'Collection postal code') as $key => $label) echo '<tr><th>' . esc_html($label) . '</th><td><input class="regular-text" name="' . esc_attr(self::OPTION) . '[bobgo_collection_' . esc_attr($key) . ']" value="' . esc_attr($settings['bobgo_collection_' . $key] ?? '') . '"></td></tr>';
+        echo '</table><h3>Parcel measurements (per package)</h3><p>Enter dimensions in centimetres and packed weight in kilograms after measuring each box.</p><table class="form-table">';
+        foreach (array('100g' => '80 units × 100g package', '250g' => '48 units × 250g package') as $size => $label) {
+            echo '<tr><th>' . esc_html($label) . '</th><td>';
+            foreach (array('length' => 'Length (cm)', 'width' => 'Width (cm)', 'height' => 'Height (cm)', 'weight' => 'Weight (kg)') as $field => $field_label) echo '<label style="display:inline-block;margin:0 12px 8px 0">' . esc_html($field_label) . '<br><input type="number" min="0" step="0.01" style="width:110px" name="' . esc_attr(self::OPTION) . '[bobgo_' . esc_attr($size) . '_' . esc_attr($field) . ']" value="' . esc_attr($settings['bobgo_' . $size . '_' . $field] ?? '') . '"></label>';
+            echo '</td></tr>';
+        }
+        echo '</table>';
         echo '<p><strong>PayFast ITN URL:</strong><br><code>' . esc_url(rest_url(self::REST_NS . '/payfast/itn')) . '</code></p>';
         echo '<p><strong>Google authorised redirect URI:</strong><br><code>' . $redirect . '</code></p>';
         submit_button(); echo '</form><hr><p>REST API base: <code>' . esc_html(rest_url(self::REST_NS . '/')) . '</code></p></div>';
