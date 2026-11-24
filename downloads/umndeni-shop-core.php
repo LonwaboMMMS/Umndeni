@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Umndeni Shop Core
  * Description: WordPress customer accounts, Google sign-in, customer profiles and persistent shop orders for the Umndeni static shop.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Reverb Daily Media
  * Requires at least: 6.2
  * Requires PHP: 7.4
@@ -11,7 +11,7 @@
 if (!defined('ABSPATH')) exit;
 
 final class Umndeni_Shop_Core {
-    const VERSION = '1.1.0';
+    const VERSION = '1.1.1';
     const REST_NS = 'umndeni/v1';
     const OPTION = 'umndn_shop_settings';
 
@@ -25,6 +25,7 @@ final class Umndeni_Shop_Core {
     private function __construct() {
         register_activation_hook(__FILE__, array(__CLASS__, 'activate'));
         add_action('rest_api_init', array($this, 'register_routes'));
+        add_filter('rest_authentication_errors', array($this, 'allow_public_account_routes_without_nonce'), 99);
         add_action('admin_menu', array($this, 'admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
         add_action('init', array($this, 'google_oauth_routes'));
@@ -138,6 +139,25 @@ final class Umndeni_Shop_Core {
             'methods' => 'POST', 'callback' => array($this, 'admin_update_order'),
             'permission_callback' => function() { return current_user_can('manage_woocommerce') || current_user_can('manage_options'); }
         ));
+    }
+
+    /**
+     * Public account endpoints must remain callable when the browser already
+     * has a WordPress auth cookie but has no current REST nonce yet.
+     * The config callback validates the signed login cookie itself and then
+     * issues a fresh REST nonce for subsequent authenticated requests.
+     */
+    public function allow_public_account_routes_without_nonce($result) {
+        if (is_wp_error($result) && $result->get_error_code() === 'rest_cookie_invalid_nonce') {
+            $route = rest_get_server()->get_current_route();
+            $public_routes = array(
+                '/' . self::REST_NS . '/config',
+                '/' . self::REST_NS . '/login',
+                '/' . self::REST_NS . '/register'
+            );
+            if (in_array($route, $public_routes, true)) return null;
+        }
+        return $result;
     }
 
     public function valid_logged_in_request($request) {
