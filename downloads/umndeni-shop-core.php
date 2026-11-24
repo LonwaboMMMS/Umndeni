@@ -147,6 +147,13 @@ final class Umndeni_Shop_Core {
     }
 
     public function config() {
+        // Restore the logged-in customer from the WordPress auth cookie.
+        // REST cookie authentication normally requires a nonce, but this
+        // endpoint supplies a fresh nonce after validating the signed cookie.
+        if (!is_user_logged_in()) {
+            $user_id = wp_validate_auth_cookie('', 'logged_in');
+            if ($user_id) wp_set_current_user($user_id);
+        }
         $settings = get_option(self::OPTION, array());
         return rest_ensure_response(array(
             'logged_in' => is_user_logged_in(),
@@ -190,7 +197,7 @@ final class Umndeni_Shop_Core {
         wp_set_current_user($user_id);
         wp_set_auth_cookie($user_id, true, is_ssl());
 
-        return rest_ensure_response(array('success' => true, 'customer' => $this->customer_data($user_id)));
+        return rest_ensure_response(array('success' => true, 'nonce' => wp_create_nonce('wp_rest'), 'customer' => $this->customer_data($user_id)));
     }
 
     public function login_customer($request) {
@@ -200,7 +207,9 @@ final class Umndeni_Shop_Core {
         if (!$user) return new WP_Error('login_failed', 'Email or password is incorrect.', array('status' => 401));
         $signed = wp_signon(array('user_login' => $user->user_login, 'user_password' => $password, 'remember' => true), is_ssl());
         if (is_wp_error($signed)) return new WP_Error('login_failed', 'Email or password is incorrect.', array('status' => 401));
-        return rest_ensure_response(array('success' => true, 'customer' => $this->customer_data($signed->ID)));
+        wp_set_current_user($signed->ID);
+        wp_set_auth_cookie($signed->ID, true, is_ssl());
+        return rest_ensure_response(array('success' => true, 'nonce' => wp_create_nonce('wp_rest'), 'customer' => $this->customer_data($signed->ID)));
     }
 
     public function logout_customer() {
