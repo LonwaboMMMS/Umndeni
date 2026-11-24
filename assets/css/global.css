@@ -250,15 +250,15 @@ h1 { margin: 11px 0 7px; color: var(--navy); font-size: clamp(27px,3vw,35px); fo
 .confirmation-reference strong { color: var(--navy); font: 800 18px Manrope,sans-serif; letter-spacing: .5px; }
 .copy-reference { position: absolute; top: 50%; right: 14px; padding: 6px 9px; transform: translateY(-50%); border: 1px solid var(--line); border-radius: 5px; background: white; color: var(--navy); font-size: 8px; }
 .confirmation-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; }
-.account-layout { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(230px,.7fr); align-items: start; gap: 16px; }
-.account-form { padding: 24px; }
+.account-layout { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(230px,.7fr); align-items: stretch; gap: 16px; }
+.account-form { box-sizing: border-box; align-self: start; margin: 0; padding: 24px; }
 .account-profile { display: flex; align-items: center; gap: 13px; margin-bottom: 23px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
 .account-avatar { display: grid; place-items: center; width: 47px; height: 47px; border-radius: 50%; background: #E9F3F6; color: var(--navy); font: 800 18px Manrope,sans-serif; }
 .account-profile h3 { margin: 0 0 4px; color: var(--navy); font-size: 13px; }
 .account-profile p { margin: 0; color: #91A0A7; font-size: 9px; }
 .account-form > .button { margin-top: 20px; }
 .form-feedback { display: inline-block; margin: 0 0 0 12px; color: var(--green); font-size: 9px; }
-.account-side { padding: 23px; }
+.account-side { box-sizing: border-box; align-self: start; margin: 0; padding: 24px; }
 .account-side h3 { margin: 7px 0; color: var(--navy); font-size: 15px; }
 .account-side > p { color: var(--muted); font-size: 10px; line-height: 1.7; }
 .account-stat { display: flex; justify-content: space-between; margin: 20px 0 14px; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: #81919A; font-size: 10px; }
